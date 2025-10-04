@@ -1,16 +1,8 @@
 import { useState } from 'react';
 import { Search, Sparkles, Filter, Heart, AlertCircle } from 'lucide-react';
+import { searchCarousell, type CarousellSearchResult } from '../lib/carousellApi';
 
-type SearchResult = {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  platform: string;
-  image_url: string;
-  url: string;
-  similarity?: number;
-};
+type SearchResult = CarousellSearchResult;
 
 type SearchViewProps = {
   onProductClick: (productId: string) => void;
@@ -22,6 +14,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [showCheckCloset, setShowCheckCloset] = useState(false);
   const [similarItemsInCloset, setSimilarItemsInCloset] = useState(3);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,59 +22,57 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
 
     setIsSearching(true);
     setShowCheckCloset(false);
+    setError(null);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Call the Carousell API
+      const carousellResults = await searchCarousell(searchQuery.trim());
+      
+      // Check if user is searching for items they might already have
+      if (searchQuery.toLowerCase().includes('black blazer') ||
+          searchQuery.toLowerCase().includes('blazer')) {
+        setShowCheckCloset(true);
+        setSimilarItemsInCloset(3);
+      }
 
-    if (searchQuery.toLowerCase().includes('black blazer') ||
-        searchQuery.toLowerCase().includes('blazer')) {
-      setShowCheckCloset(true);
-      setSimilarItemsInCloset(3);
+      setResults(carousellResults);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('Failed to search. Please try again.');
+      
+      // Fallback to mock data if API fails
+      setResults([
+        {
+          id: '1',
+          name: 'Linen Pants',
+          price: 20,
+          currency: 'USD',
+          platform: 'Depop',
+          image_url: 'https://images.pexels.com/photos/5865474/pexels-photo-5865474.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+        {
+          id: '2',
+          name: 'Cream Beach Sweater',
+          price: 43,
+          currency: 'USD',
+          platform: 'Poshmark',
+          image_url: 'https://images.pexels.com/photos/5865527/pexels-photo-5865527.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+      ]);
+    } finally {
+      setIsSearching(false);
     }
-
-    setResults([
-      {
-        id: '1',
-        name: 'Linen Pants',
-        price: 20,
-        currency: 'USD',
-        platform: 'Depop',
-        image_url: 'https://images.pexels.com/photos/5865474/pexels-photo-5865474.jpeg?auto=compress&cs=tinysrgb&w=800',
-        url: '#',
-      },
-      {
-        id: '2',
-        name: 'Cream Beach Sweater',
-        price: 43,
-        currency: 'USD',
-        platform: 'Poshmark',
-        image_url: 'https://images.pexels.com/photos/5865527/pexels-photo-5865527.jpeg?auto=compress&cs=tinysrgb&w=800',
-        url: '#',
-      },
-      {
-        id: '3',
-        name: 'Vintage Striped Tee',
-        price: 18,
-        currency: 'USD',
-        platform: 'eBay',
-        image_url: 'https://images.pexels.com/photos/6311392/pexels-photo-6311392.jpeg?auto=compress&cs=tinysrgb&w=800',
-        url: '#',
-      },
-      {
-        id: '4',
-        name: 'White Button Down',
-        price: 25,
-        currency: 'USD',
-        platform: 'ThredUp',
-        image_url: 'https://images.pexels.com/photos/794062/pexels-photo-794062.jpeg?auto=compress&cs=tinysrgb&w=800',
-        url: '#',
-      },
-    ]);
-
-    setIsSearching(false);
   };
 
-  const platforms = ['All', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
+  const platforms = ['All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
   const [selectedPlatform, setSelectedPlatform] = useState('All');
+
+  // Filter results based on selected platform
+  const filteredResults = selectedPlatform === 'All' 
+    ? results 
+    : results.filter(item => item.platform === selectedPlatform);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -127,6 +118,18 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
         ))}
       </div>
 
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-1">Search Error</h3>
+              <p className="text-sm text-slate-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCheckCloset && (
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
@@ -151,7 +154,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
           </div>
           <p className="text-slate-600 mt-4">Searching across platforms...</p>
         </div>
-      ) : results.length === 0 ? (
+      ) : filteredResults.length === 0 && results.length === 0 ? (
         <div className="text-center py-20">
           <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">
@@ -161,11 +164,22 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
             Use natural language to describe what you're looking for. Try "coastal granddaughter core" or "vintage leather jacket"
           </p>
         </div>
+      ) : filteredResults.length === 0 ? (
+        <div className="text-center py-20">
+          <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+            No Results Found
+          </h3>
+          <p className="text-slate-600 max-w-md mx-auto">
+            No items found for "{selectedPlatform}". Try selecting "All" platforms or a different platform.
+          </p>
+        </div>
       ) : (
         <div>
           <div className="flex items-center justify-between mb-4">
             <p className="text-slate-600">
-              Top <strong>{results.length}</strong> results
+              Top <strong>{filteredResults.length}</strong> results
+              {selectedPlatform !== 'All' && ` from ${selectedPlatform}`}
             </p>
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Sparkles className="w-4 h-4" />
@@ -174,7 +188,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {results.map((item) => (
+            {filteredResults.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onProductClick(item.id)}
@@ -185,6 +199,10 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
                     src={item.image_url}
                     alt={item.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    onError={(e) => {
+                      // Fallback image if the original fails to load
+                      (e.target as HTMLImageElement).src = 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=800';
+                    }}
                   />
                   <div className="absolute top-2 right-2">
                     <button
@@ -205,7 +223,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
                     {item.name}
                   </h3>
                   <p className="text-lg font-bold text-slate-900">
-                    ${item.price}
+                    {item.currency === 'SGD' ? 'S$' : '$'}{item.price}
                   </p>
                   <p className="text-xs text-slate-500 mt-1">{item.currency}</p>
                 </div>
@@ -217,3 +235,10 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     </div>
   );
 }
+
+
+
+
+
+
+
