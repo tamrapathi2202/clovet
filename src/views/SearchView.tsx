@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Sparkles, Filter, Heart, AlertCircle } from 'lucide-react';
 import { searchCarousell, type CarousellSearchResult } from '../lib/carousellApi';
+import { useSearch } from '../contexts/SearchContext';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 type SearchResult = CarousellSearchResult;
 
@@ -9,12 +12,91 @@ type SearchViewProps = {
 };
 
 export default function SearchView({ onProductClick }: SearchViewProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const { 
+    searchResults, 
+    setSearchResults, 
+    currentSearchQuery, 
+    setCurrentSearchQuery,
+    selectedPlatform,
+    setSelectedPlatform 
+  } = useSearch();
+  const { user } = useAuth();
+  
+  const [searchQuery, setSearchQuery] = useState(currentSearchQuery);
   const [isSearching, setIsSearching] = useState(false);
   const [showCheckCloset, setShowCheckCloset] = useState(false);
   const [similarItemsInCloset, setSimilarItemsInCloset] = useState(3);
   const [error, setError] = useState<string | null>(null);
+  const [favoriteItems, setFavoriteItems] = useState<Set<string>>(new Set());
+
+  // Load favorite items on mount
+  useEffect(() => {
+    if (user) {
+      loadFavoriteItems();
+    }
+  }, [user]);
+
+  const loadFavoriteItems = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('favorite_items')
+        .select('external_id')
+        .eq('user_id', user.id);
+      
+      const favoriteIds = new Set(data?.map(item => item.external_id) || []);
+      setFavoriteItems(favoriteIds);
+    } catch (err) {
+      console.error('Error loading favorites:', err);
+    }
+  };
+
+  const toggleFavorite = async (item: SearchResult, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+
+    const itemId = item.id;
+    const isFavorite = favoriteItems.has(itemId);
+
+    try {
+      if (isFavorite) {
+        await supabase
+          .from('favorite_items')
+          .delete()
+          .eq('external_id', itemId)
+          .eq('user_id', user.id);
+        
+        setFavoriteItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(itemId);
+          return newSet;
+        });
+      } else {
+        await supabase.from('favorite_items').insert({
+          user_id: user.id,
+          item_name: item.name,
+          platform: item.platform,
+          external_id: itemId,
+          image_url: item.image_url,
+          price: item.price,
+          currency: item.currency,
+          seller: item.seller || null,
+          url: item.url,
+          metadata: {
+            condition: item.condition,
+            size: item.size,
+            brand: item.brand,
+            description: item.description
+          },
+        });
+        
+        setFavoriteItems(prev => new Set(prev).add(itemId));
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    }
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +107,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     setError(null);
 
     try {
-      // Call the Carousell API
+      // Call the Carousell API (no rate limiting)
       const carousellResults = await searchCarousell(searchQuery.trim());
       
       // Check if user is searching for items they might already have
@@ -35,13 +117,20 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
         setSimilarItemsInCloset(3);
       }
 
-      setResults(carousellResults);
+      // Update context with results
+      setSearchResults(carousellResults);
+      setCurrentSearchQuery(searchQuery.trim());
+      
+      // Reload favorites to include new results
+      if (user) {
+        loadFavoriteItems();
+      }
     } catch (err) {
       console.error('Search error:', err);
       setError('Failed to search. Please try again.');
       
       // Fallback to mock data if API fails
-      setResults([
+      const fallbackResults = [
         {
           id: '1',
           name: 'Linen Pants',
@@ -60,19 +149,19 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
           image_url: 'https://images.pexels.com/photos/5865527/pexels-photo-5865527.jpeg?auto=compress&cs=tinysrgb&w=800',
           url: '#',
         },
-      ]);
+      ] as SearchResult[];
+      setSearchResults(fallbackResults);
     } finally {
       setIsSearching(false);
     }
   };
 
   const platforms = ['All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
-  const [selectedPlatform, setSelectedPlatform] = useState('All');
 
   // Filter results based on selected platform
   const filteredResults = selectedPlatform === 'All' 
-    ? results 
-    : results.filter(item => item.platform === selectedPlatform);
+    ? searchResults 
+    : searchResults.filter((item: SearchResult) => item.platform === selectedPlatform);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -154,7 +243,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
           </div>
           <p className="text-slate-600 mt-4">Searching across platforms...</p>
         </div>
-      ) : filteredResults.length === 0 && results.length === 0 ? (
+      ) : filteredResults.length === 0 && searchResults.length === 0 ? (
         <div className="text-center py-20">
           <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">
@@ -188,7 +277,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {filteredResults.map((item) => (
+            {filteredResults.map((item: SearchResult) => (
               <div
                 key={item.id}
                 onClick={() => onProductClick(item.id)}
@@ -206,10 +295,16 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
                   />
                   <div className="absolute top-2 right-2">
                     <button
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => toggleFavorite(item, e)}
                       className="bg-white bg-opacity-90 backdrop-blur-sm p-2 rounded-full hover:bg-opacity-100 transition"
                     >
-                      <Heart className="w-4 h-4 text-slate-700" />
+                      <Heart 
+                        className={`w-4 h-4 ${
+                          favoriteItems.has(item.id) 
+                            ? 'text-red-500 fill-red-500' 
+                            : 'text-slate-700'
+                        }`} 
+                      />
                     </button>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">

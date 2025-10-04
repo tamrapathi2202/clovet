@@ -91,7 +91,7 @@ export default function HomeView({ onProductClick }: HomeViewProps) {
           <Sparkles className="w-6 h-6 text-amber-500" />
           <h2 className="text-2xl font-bold text-slate-900">For You</h2>
         </div>
-        <p className="text-slate-600">
+        <p className="text-slate-600" style={{ fontFamily: 'var(--font-goldman)' }}>
           Personalized picks based on your style and wardrobe
         </p>
       </div>

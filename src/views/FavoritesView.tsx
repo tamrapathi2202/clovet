@@ -5,9 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 
 type FavoritesViewProps = {
   onProductClick: (productId: string) => void;
+  onVirtualTryOnClick: (favorites: FavoriteItem[]) => void;
 };
 
-export default function FavoritesView({ onProductClick }: FavoritesViewProps) {
+export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: FavoritesViewProps) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -104,7 +105,10 @@ export default function FavoritesView({ onProductClick }: FavoritesViewProps) {
                 <p className="text-sm text-slate-700 mb-3">
                   Create outfits with your favorites and see how they look on you
                 </p>
-                <button className="text-sm font-medium bg-white text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-50 transition">
+                <button 
+                  onClick={() => onVirtualTryOnClick(favorites)}
+                  className="text-sm font-medium bg-white text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-50 transition"
+                >
                   Try Virtual Try-On
                 </button>
               </div>

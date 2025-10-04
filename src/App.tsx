@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SearchProvider } from './contexts/SearchContext';
 import Auth from './components/Auth';
 import Layout from './components/Layout';
 import HomeView from './views/HomeView';
@@ -7,11 +8,13 @@ import SearchView from './views/SearchView';
 import FavoritesView from './views/FavoritesView';
 import WardrobeView from './views/WardrobeView';
 import ProductView from './views/ProductView';
+import VirtualTryOnView from './views/VirtualTryOnView';
 
 function AppContent() {
   const { user, loading } = useAuth();
-  const [currentView, setCurrentView] = useState<'home' | 'search' | 'favorites' | 'wardrobe' | 'product'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'search' | 'favorites' | 'wardrobe' | 'product' | 'virtual-try-on'>('home');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [favoriteItems, setFavoriteItems] = useState<any[]>([]);
 
   if (loading) {
     return (
@@ -34,19 +37,32 @@ function AppContent() {
   };
 
   const handleBackFromProduct = () => {
-    setCurrentView('home');
+    setCurrentView('search'); // Go back to search instead of home
     setSelectedProductId(null);
+  };
+
+  const handleVirtualTryOnClick = (favorites: any[]) => {
+    setFavoriteItems(favorites);
+    setCurrentView('virtual-try-on');
+  };
+
+  const handleBackFromVirtualTryOn = () => {
+    setCurrentView('favorites');
   };
 
   if (currentView === 'product' && selectedProductId) {
     return <ProductView productId={selectedProductId} onBack={handleBackFromProduct} />;
   }
 
+  if (currentView === 'virtual-try-on') {
+    return <VirtualTryOnView onBack={handleBackFromVirtualTryOn} favorites={favoriteItems} />;
+  }
+
   return (
-    <Layout currentView={currentView} onNavigate={setCurrentView}>
+    <Layout currentView={currentView === 'product' ? 'favorites' : currentView as 'home' | 'search' | 'favorites' | 'wardrobe'} onNavigate={setCurrentView}>
       {currentView === 'home' && <HomeView onProductClick={handleProductClick} />}
       {currentView === 'search' && <SearchView onProductClick={handleProductClick} />}
-      {currentView === 'favorites' && <FavoritesView onProductClick={handleProductClick} />}
+      {currentView === 'favorites' && <FavoritesView onProductClick={handleProductClick} onVirtualTryOnClick={handleVirtualTryOnClick} />}
       {currentView === 'wardrobe' && <WardrobeView />}
     </Layout>
   );
@@ -55,7 +71,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <SearchProvider>
+        <AppContent />
+      </SearchProvider>
     </AuthProvider>
   );
 }

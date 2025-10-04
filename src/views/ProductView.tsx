@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Heart, ExternalLink, Package, Store, Calendar, Tag, Ruler, Sparkles, AlertCircle } from 'lucide-react';
 import { supabase, FavoriteItem, WardrobeItem } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { getCarousellProduct } from '../lib/carousellApi';
+import { useSearch } from '../contexts/SearchContext';
 
 type Product = {
   id: string;
@@ -39,6 +41,7 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
   const [loading, setLoading] = useState(true);
   const [similarInCloset, setSimilarInCloset] = useState<WardrobeItem[]>([]);
   const { user } = useAuth();
+  const { searchResults } = useSearch();
 
   useEffect(() => {
     loadProduct();
@@ -49,8 +52,64 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
   }, [productId, user]);
 
   const loadProduct = async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    setLoading(true);
+    
+    // First try to get product from search results cache
+    const cachedProduct = searchResults.find(item => item.id === productId);
+    
+    if (cachedProduct) {
+      // Convert CarousellSearchResult to Product format
+      setProduct({
+        id: cachedProduct.id,
+        name: cachedProduct.name,
+        price: cachedProduct.price,
+        currency: cachedProduct.currency,
+        platform: cachedProduct.platform,
+        image_url: cachedProduct.image_url,
+        url: cachedProduct.url,
+        description: cachedProduct.description || 'No description available',
+        condition: cachedProduct.condition || 'Good',
+        size: cachedProduct.size || 'One Size',
+        brand: cachedProduct.brand || 'Unknown Brand',
+        seller: cachedProduct.seller || 'Unknown Seller',
+        posted_date: cachedProduct.posted_date || new Date().toISOString().split('T')[0],
+        category: cachedProduct.category || 'Clothing',
+        color: cachedProduct.color || 'Unknown',
+        material: cachedProduct.material || 'Mixed Materials',
+        measurements: cachedProduct.measurements
+      });
+      setLoading(false);
+      return;
+    }
 
+    // Fallback to API cache
+    const apiCachedProduct = getCarousellProduct(productId);
+    if (apiCachedProduct) {
+      setProduct({
+        id: apiCachedProduct.id,
+        name: apiCachedProduct.name,
+        price: apiCachedProduct.price,
+        currency: apiCachedProduct.currency,
+        platform: apiCachedProduct.platform,
+        image_url: apiCachedProduct.image_url,
+        url: apiCachedProduct.url,
+        description: apiCachedProduct.description || 'No description available',
+        condition: apiCachedProduct.condition || 'Good',
+        size: apiCachedProduct.size || 'One Size',
+        brand: apiCachedProduct.brand || 'Unknown Brand',
+        seller: apiCachedProduct.seller || 'Unknown Seller',
+        posted_date: apiCachedProduct.posted_date || new Date().toISOString().split('T')[0],
+        category: apiCachedProduct.category || 'Clothing',
+        color: apiCachedProduct.color || 'Unknown',
+        material: apiCachedProduct.material || 'Mixed Materials',
+        measurements: apiCachedProduct.measurements
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Fallback to mock data if not found in cache
+    await new Promise(resolve => setTimeout(resolve, 300));
     setProduct({
       id: productId,
       name: 'Vintage Ralph Lauren Cable Knit Sweater',
@@ -197,7 +256,9 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-slate-900">${product.price}</p>
+                  <p className="text-3xl font-bold text-slate-900">
+                    {product.currency === 'SGD' ? 'S$' : '$'}{product.price}
+                  </p>
                   <p className="text-sm text-slate-500">{product.currency}</p>
                 </div>
               </div>
