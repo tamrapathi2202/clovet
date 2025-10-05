@@ -49,11 +49,13 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
     }
   };
 
-  const platforms = ['All', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
+  const platforms = ['All', 'My Wardrobe', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
   const [selectedPlatform, setSelectedPlatform] = useState('All');
 
   const filteredFavorites = selectedPlatform === 'All'
     ? favorites
+    : selectedPlatform === 'My Wardrobe'
+    ? favorites.filter(item => item.platform === 'wardrobe')
     : favorites.filter(item => item.platform === selectedPlatform);
 
   return (
@@ -89,10 +91,18 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
         <div className="text-center py-20">
           <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            {selectedPlatform === 'All' ? 'No favorites yet' : `No favorites from ${selectedPlatform}`}
+            {selectedPlatform === 'All' 
+              ? 'No favorites yet' 
+              : selectedPlatform === 'My Wardrobe' 
+              ? 'No wardrobe items favorited yet'
+              : `No favorites from ${selectedPlatform}`
+            }
           </h3>
           <p className="text-slate-600 mb-6">
-            Start saving items you love while browsing
+            {selectedPlatform === 'My Wardrobe' 
+              ? 'Add items to your favorites from your wardrobe to see them here'
+              : 'Start saving items you love while browsing'
+            }
           </p>
         </div>
       ) : (
@@ -119,8 +129,15 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
             {filteredFavorites.map((item) => (
               <div
                 key={item.id}
-                onClick={() => onProductClick(item.external_id)}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition group cursor-pointer"
+                onClick={() => {
+                  // Don't navigate for wardrobe items since they don't have external URLs
+                  if (item.platform !== 'wardrobe') {
+                    onProductClick(item.external_id);
+                  }
+                }}
+                className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition group ${
+                  item.platform !== 'wardrobe' ? 'cursor-pointer' : 'cursor-default'
+                }`}
               >
                 <div className="aspect-[3/4] relative">
                   <img
@@ -141,11 +158,11 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
                     <span className="text-xs text-white font-medium bg-slate-900 bg-opacity-50 px-2 py-1 rounded">
-                      {item.platform}
+                      {item.platform === 'wardrobe' ? 'My Wardrobe' : item.platform}
                     </span>
                   </div>
                 </div>
-                <div className="p-3">
+                                <div className="p-3">
                   <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2">
                     {item.item_name}
                   </h3>
@@ -154,18 +171,27 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
                   </p>
                   <p className="text-xs text-slate-500 mt-1">{item.currency}</p>
                   {item.seller && (
-                    <p className="text-xs text-slate-400 mt-1">by {item.seller}</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {item.platform === 'wardrobe' ? `Brand: ${item.seller}` : `by ${item.seller}`}
+                    </p>
                   )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(item.url, '_blank');
-                    }}
-                    className="mt-3 flex items-center justify-center gap-2 w-full bg-slate-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition"
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                    View Listing
-                  </button>
+                  {item.platform !== 'wardrobe' && item.url && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.url, '_blank');
+                      }}
+                      className="w-full mt-2 bg-slate-900 text-white text-xs py-2 rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-1"
+                    >
+                      <ShoppingCart className="w-3 h-3" />
+                      Shop Now
+                    </button>
+                  )}
+                  {item.platform === 'wardrobe' && (
+                    <div className="w-full mt-2 bg-violet-100 text-violet-700 text-xs py-2 rounded-lg text-center">
+                      From Your Wardrobe
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
