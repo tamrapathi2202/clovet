@@ -50,7 +50,7 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
   };
 
   const platforms = ['All', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'].map(platform => (
-    <span key={platform} style={{ color: 'rgba(255, 251, 247, 1)', fontFamily: 'var(--font-warbler)'}}>{platform}</span>
+    <span key={platform} style={{ color: 'rgba(255, 251, 247, 1)',   }}>{platform}</span>
   ));
   const [selectedPlatform, setSelectedPlatform] = useState('All');
 
@@ -59,7 +59,7 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
     : favorites.filter(item => item.platform === selectedPlatform);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6" style={{ backgroundColor: 'rgba(255, 251, 247, 1)' }}>
+    <div className="max-w-7xl mx-auto px-4 py-6 whitecolor"  >
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Favorites</h2>
         <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.75rem' }}>
@@ -87,7 +87,7 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
       ) : filteredFavorites.length === 0 ? (
         <div className="text-center py-20" >
           <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{    color: 'rgb(45, 80, 22)' }}>
             {selectedPlatform === 'All' ? 'No favorites yet' : `No favorites from ${selectedPlatform}`}
           </h3>
           <p className="text-slate-600 mb-6" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
@@ -98,9 +98,9 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
         <>
           <div className="mb-6 border rounded-xl p-4" style={{ backgroundColor: 'rgb(248, 242, 237)', borderColor: 'rgb(45, 80, 22)' }}>
   <div className="flex items-start gap-3">
-    <Wand2 className="w-5 h-5 mt-0.5" style={{ color: 'rgb(242, 109, 22)' }} />
+    <Wand2 className="w-5 h-5 mt-0.5 orangecolor"   />
     <div>
-      <h3 className="font-semibold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>AI Mix & Match</h3>
+      <h3 className="font-semibold text-slate-900 mb-1" style={{    color: 'rgb(45, 80, 22)' }}>AI Mix & Match</h3>
       <p className="text-sm text-slate-700 mb-3" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', background: 'rgb(248, 242, 237)', borderColor: 'rgb(45, 80, 22)', fontSize: '1.40rem' }}>
         Create outfits with your favorites and see how they look on you
       </p>
@@ -146,15 +146,15 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
                   </div>
                 </div>
                 <div className="p-3">
-                  <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>
+                  <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2" style={{    color: 'rgb(45 80 22)' }}>
                     {item.item_name}
                   </h3>
                   <p className="text-lg font-bold text-slate-900" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(242, 109, 22)', fontSize: '1.75rem' }}>
                     ${item.price}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', fontSize: '1rem' }}>{item.currency}</p>
+                  <p className="text-xs text-slate-500 mt-1" style={{    color: 'rgb(45, 80, 22)', fontSize: '1rem' }}>{item.currency}</p>
                   {item.seller && (
-                    <p className="text-xs text-slate-400 mt-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', fontSize: '1rem' }}>by {item.seller}</p>
+                    <p className="text-xs text-slate-400 mt-1" style={{    color: 'rgb(45, 80, 22)', fontSize: '1rem' }}>by {item.seller}</p>
                   )}
                   <button
                     onClick={(e) => {

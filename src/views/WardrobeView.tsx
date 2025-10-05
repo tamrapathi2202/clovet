@@ -32,7 +32,7 @@ export default function WardrobeView() {
   };
 
   const categories = ['All', 'Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Shoes', 'Accessories'].map(category => (
-    <span key={category} style={{ color: 'rgba(255, 251, 247, 1)', fontFamily: 'var(--font-warbler)' }}>{category}</span>
+    <span key={category} style={{ color: 'rgba(255, 251, 247, 1)',  }}>{category}</span>
   ));
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -43,7 +43,6 @@ export default function WardrobeView() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>My Wardrobe</h2>
         <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.75rem' }}>
           {items.length} {items.length === 1 ? 'item' : 'items'} in your collection
         </p>
@@ -68,8 +67,8 @@ export default function WardrobeView() {
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="text-center py-20">
-  <ShoppingBag className="w-16 h-16 mx-auto mb-4" style={{ color: 'rgb(242, 109, 22)' }} />
-  <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
+  <ShoppingBag className="w-16 h-16 mx-auto mb-4 orangecolor"   />
+  <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
     {selectedCategory === 'All' ? 'Your wardrobe is empty' : `No ${selectedCategory.toLowerCase()} yet`}
   </h3>
           <p className="text-slate-600 mb-6" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>

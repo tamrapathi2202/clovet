@@ -89,7 +89,7 @@ export default function HomeView({ onProductClick }: HomeViewProps) {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-6 h-6 text-amber-500" />
-          <h2 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>
+          <h2 className="text-2xl font-bold text-slate-900" style={{    color: 'rgb(45 80 22)' }}>
             For You</h2>
         </div>
         <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45 80 22)', fontSize: '1.75rem' }}>
@@ -101,8 +101,8 @@ export default function HomeView({ onProductClick }: HomeViewProps) {
         <div className="flex items-start gap-3" >
           <TrendingUp className="w-5 h-5 text-amber-600 mt-0.5" />
           <div>
-            <h3 className="font-semibold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>Proactive Discovery</h3>
-            <p className="text-sm text-slate-700" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)', background: '(rgb(248, 242, 237)', borderColor: 'rgb(45 80 22)' }}>
+            <h3 className="font-semibold text-slate-900 mb-1" style={{    color: 'rgb(45 80 22)' }}>Proactive Discovery</h3>
+            <p className="text-sm text-slate-700" style={{    color: 'rgb(45 80 22)', background: '(rgb(248, 242, 237)', borderColor: 'rgb(45 80 22)' }}>
               You've been saving pins with <strong>old money vibes</strong>. Here are some vintage finds that match your aesthetic.
             </p>
           </div>
@@ -137,27 +137,27 @@ export default function HomeView({ onProductClick }: HomeViewProps) {
               </div>
             </div>
             <div className="p-3">
-              <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>
+              <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2" style={{ color: 'rgb(45 80 22)' }}>
                 {item.name}
               </h3>
               <p className="text-lg font-bold text-slate-900" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(242, 109, 22)', fontSize: '1.75rem' }}>
                 ${item.price}
               </p>
-              <p className="text-xs text-slate-500 mt-1" style={{ color: 'rgb(45 80 22)', fontFamily: 'var(--font-warbler)' }}>{item.currency}</p>
+              <p className="text-xs text-slate-500 mt-1" style={{ color: 'rgb(45 80 22)'  }}>{item.currency}</p>
             </div>
           </div>
         ))}
       </div>
 
       <div className="mt-12">
-        <h3 className="text-xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>Style Bundles</h3>
+        <h3 className="text-xl font-bold text-slate-900 mb-4" style={{    color: 'rgb(45 80 22)' }}>Style Bundles</h3>
         <p className="text-slate-600 mb-6" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45 80 22)', fontSize: '1.5rem' }}>
           Mix and match suggestions based on your wardrobe
         </p>
 
         {bundles.length === 0 ? (
   <div className="bg-white rounded-xl p-8 text-center border-2 border-dashed" style={{ borderColor: 'rgb(45, 80, 22)' }}>
-    <p className="text-slate-600" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
+    <p className="text-slate-600" style={{color: 'rgb(45, 80, 22)' }}>
       Add items to your wardrobe to see personalized style bundles
     </p>
   </div>
@@ -192,7 +192,7 @@ export default function HomeView({ onProductClick }: HomeViewProps) {
 
 function Heart({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ color: 'rgb(242, 109, 22)' }}>
+    <svg className={className + " orangecolor"} viewBox="0 0 24 24" fill="none" stroke="currentColor"  >
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
     </svg>
   );
