@@ -1,4 +1,4 @@
-import { Heart, Leaf } from 'lucide-react';
+import { Heart, Leaf, ShoppingCart } from 'lucide-react';
 
 type ProductCardProps = {
   id: string;
@@ -7,6 +7,7 @@ type ProductCardProps = {
   currency: string;
   platform: string;
   image_url: string;
+  url?: string;
   matchScore?: number;
   sustainabilityScore?: number;
   onClick: (id: string) => void;
@@ -21,6 +22,7 @@ export default function ProductCard({
   currency,
   platform,
   image_url,
+  url,
   matchScore,
   sustainabilityScore,
   onClick,
@@ -91,9 +93,21 @@ export default function ProductCard({
         </div>
 
         <div className="mt-3 pt-3 border-t border-slate-100">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 mb-3">
             Secondhand • Sustainable Choice
           </p>
+          {url && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(url, '_blank');
+              }}
+              className="w-full bg-slate-900 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-2 group/btn"
+            >
+              <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+              Shop Now
+            </button>
+          )}
         </div>
       </div>
     </div>

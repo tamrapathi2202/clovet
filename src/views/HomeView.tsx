@@ -96,6 +96,60 @@ export default function HomeView({ onProductClick, onNavigate }: HomeViewProps) 
           platform: 'Poshmark',
           image_url: 'https://images.pexels.com/photos/7679454/pexels-photo-7679454.jpeg?auto=compress&cs=tinysrgb&w=800',
           url: '#',
+        },
+        {
+          id: '3',
+          name: 'Levi\'s Vintage 501 Jeans',
+          price: 45,
+          currency: 'USD',
+          platform: 'Carousell',
+          image_url: 'https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+        {
+          id: '4',
+          name: 'Anthropologie Floral Blouse',
+          price: 28,
+          currency: 'USD',
+          platform: 'Depop',
+          image_url: 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+        {
+          id: '5',
+          name: 'Adidas Originals Sneakers',
+          price: 55,
+          currency: 'USD',
+          platform: 'Carousell',
+          image_url: 'https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+        {
+          id: '6',
+          name: 'Zara Wool Blend Coat',
+          price: 65,
+          currency: 'USD',
+          platform: 'Poshmark',
+          image_url: 'https://images.pexels.com/photos/1337477/pexels-photo-1337477.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+        {
+          id: '7',
+          name: 'Mango Midi Dress',
+          price: 32,
+          currency: 'USD',
+          platform: 'Depop',
+          image_url: 'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
+        },
+        {
+          id: '8',
+          name: 'Nike Air Max Vintage',
+          price: 42,
+          currency: 'USD',
+          platform: 'Carousell',
+          image_url: 'https://images.pexels.com/photos/2048548/pexels-photo-2048548.jpeg?auto=compress&cs=tinysrgb&w=800',
+          url: '#',
         }
       ];
       
@@ -130,55 +184,40 @@ export default function HomeView({ onProductClick, onNavigate }: HomeViewProps) 
             Personalized picks based on your style and wardrobe
           </p>
         </div>
-        <button 
-          onClick={() => {
-            setSelectedPlatform('For You');
-            onNavigate('explore');
-          }} 
-          className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 bg-white border border-slate-300 rounded-lg hover:border-slate-400 transition whitespace-nowrap"
-        >
-            View All
-        </button>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400 hidden sm:block">Scroll to see more →</span>
+          <button 
+            onClick={() => {
+              setSelectedPlatform('For You');
+              onNavigate('explore');
+            }} 
+            className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 bg-white border border-slate-300 rounded-lg hover:border-slate-400 transition whitespace-nowrap"
+          >
+              View All
+          </button>
+        </div>
       </div>
 
-      <div className="overflow-x-auto pb-4 -mx-4 px-4">
-        <div className="flex flex-col gap-4" style={{ width: 'max-content' }}>
-          <div className="flex gap-4">
-            {recommendations.slice(0, 3).map((item, index) => (
-              <div key={item.id} className="w-48 sm:w-56 flex-shrink-0">
-                <ProductCard
-                  id={item.id}
-                  name={item.name}
-                  price={item.price}
-                  currency={item.currency}
-                  platform={item.platform}
-                  image_url={item.image_url}
-                  matchScore={index === 0 ? 92 : index === 1 ? 88 : index === 2 ? 85 : undefined}
-                  sustainabilityScore={index < 3 ? 95 : undefined}
-                  onClick={onProductClick}
-                  onFavorite={handleFavoriteToggle}
-                  isFavorited={favorites.has(item.id)}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-4">
-            {recommendations.slice(3, 6).map((item) => (
-              <div key={item.id} className="w-48 sm:w-56 flex-shrink-0">
-                <ProductCard
-                  id={item.id}
-                  name={item.name}
-                  price={item.price}
-                  currency={item.currency}
-                  platform={item.platform}
-                  image_url={item.image_url}
-                  onClick={onProductClick}
-                  onFavorite={handleFavoriteToggle}
-                  isFavorited={favorites.has(item.id)}
-                />
-              </div>
-            ))}
-          </div>
+      <div className="overflow-x-auto pb-4 -mx-4 px-4 scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+        <div className="flex gap-4" style={{ width: 'max-content', minWidth: '100%' }}>
+          {recommendations.map((item, index) => (
+            <div key={item.id} className="w-48 sm:w-56 flex-shrink-0">
+              <ProductCard
+                id={item.id}
+                name={item.name}
+                price={item.price}
+                currency={item.currency}
+                platform={item.platform}
+                image_url={item.image_url}
+                url={item.url}
+                matchScore={index < 5 ? 95 - (index * 2) : undefined}
+                sustainabilityScore={index < 8 ? 95 - Math.floor(index / 2) : undefined}
+                onClick={onProductClick}
+                onFavorite={handleFavoriteToggle}
+                isFavorited={favorites.has(item.id)}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -149,3 +149,100 @@ export function downloadGeneratedImage(dataUrl: string, filename: string = 'virt
   link.click();
   document.body.removeChild(link);
 }
+
+export type SemanticSearchRequest = {
+  query: string;
+  maxResults?: number;
+};
+
+export type SemanticSearchResult = {
+  keywords: string[];
+  categories: string[];
+  colors: string[];
+  styles: string[];
+  brands: string[];
+  occasions: string[];
+  priceRange?: { min: number; max: number };
+  enhancedQuery: string;
+};
+
+export async function enhanceSearchWithSemantics(request: SemanticSearchRequest): Promise<SemanticSearchResult> {
+  if (!GEMINI_API_KEY) {
+    throw new Error('Gemini API key not configured');
+  }
+
+  try {
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+    const prompt = `You are a fashion search expert. Analyze the following search query and extract structured information to help find relevant secondhand fashion items.
+
+Search Query: "${request.query}"
+
+Please analyze this query and provide:
+1. Relevant keywords (specific clothing items, materials, patterns)
+2. Categories (tops, bottoms, dresses, outerwear, accessories, shoes)
+3. Colors mentioned or implied
+4. Style descriptors (vintage, preppy, boho, minimalist, streetwear, etc.)
+5. Brand names if mentioned
+6. Occasions (casual, formal, work, party, beach, etc.)
+7. Price range if implied (budget, mid-range, luxury)
+8. An enhanced search query that captures the essence better
+
+For aesthetic terms like "coastal granddaughter", "old money", "quiet luxury", "dark academia":
+- Extract the visual elements, colors, and clothing types associated with that aesthetic
+- Suggest specific items that embody that style
+
+Return ONLY a JSON object with this structure:
+{
+  "keywords": ["keyword1", "keyword2"],
+  "categories": ["category1"],
+  "colors": ["color1"],
+  "styles": ["style1"],
+  "brands": ["brand1"],
+  "occasions": ["occasion1"],
+  "priceRange": { "min": 0, "max": 1000 },
+  "enhancedQuery": "improved search query"
+}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ parts: [{ text: prompt }] }],
+    });
+
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      throw new Error('No response from Gemini API');
+    }
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('Invalid JSON response from Gemini API');
+    }
+
+    const result = JSON.parse(jsonMatch[0]);
+
+    return {
+      keywords: result.keywords || [],
+      categories: result.categories || [],
+      colors: result.colors || [],
+      styles: result.styles || [],
+      brands: result.brands || [],
+      occasions: result.occasions || [],
+      priceRange: result.priceRange,
+      enhancedQuery: result.enhancedQuery || request.query,
+    };
+
+  } catch (error) {
+    console.error('Error enhancing search:', error);
+    return {
+      keywords: [request.query],
+      categories: [],
+      colors: [],
+      styles: [],
+      brands: [],
+      occasions: [],
+      enhancedQuery: request.query,
+    };
+  }
+}

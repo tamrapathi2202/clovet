@@ -1,6 +1,6 @@
 // Carousell API service with caching
-const RAPIDAPI_KEY = '486dba2e3cmsh62cf3a0e02ec594p1c21f2jsn6d89d32d6b12';
-const RAPIDAPI_HOST = 'carousell.p.rapidapi.com';
+const RAPIDAPI_KEY = import.meta.env.VITE_RAPIDAPI_KEY
+const RAPIDAPI_HOST = import.meta.env.VITE_RAPIDAPI_HOST
 
 export type CarousellSearchResult = {
   id: string;
@@ -42,6 +42,7 @@ export async function searchCarousell(keyword: string, country: string = 'sg'): 
   }
 
   try {
+    console.log('Fetching new results from Carousell API for:', keyword);
     const url = `https://carousell.p.rapidapi.com/searchByKeyword?keyword=${encodeURIComponent(keyword)}&country=${country}`;
     
     const response = await fetch(url, {

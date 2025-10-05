@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Search, Sparkles, Filter, Heart, AlertCircle } from 'lucide-react';
+import { Search, Sparkles, Filter, Heart, AlertCircle, X, Tag, ShoppingCart} from 'lucide-react';
 import { searchCarousell } from '../lib/carousellApi';
 import { useSearch, type UnifiedSearchResult } from '../contexts/SearchContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { enhanceSearchWithSemantics, type SemanticSearchResult } from '../lib/geminiApi';
 
 type SearchResult = UnifiedSearchResult;
 
@@ -29,6 +30,17 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
   const [similarItemsInCloset, setSimilarItemsInCloset] = useState(3);
   const [error, setError] = useState<string | null>(null);
   const [favoriteItems, setFavoriteItems] = useState<Set<string>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    priceRange: { min: '', max: '' },
+    category: '',
+    condition: '',
+    color: '',
+    brand: '',
+    size: ''
+  });
+  const [semanticData, setSemanticData] = useState<SemanticSearchResult | null>(null);
+  const [useSemanticSearch, setUseSemanticSearch] = useState(true);
 
   // Load favorite items on mount
   useEffect(() => {
@@ -106,13 +118,24 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     setIsSearching(true);
     setShowCheckCloset(false);
     setError(null);
+    setSemanticData(null);
+
 
     try {
       let allResults: UnifiedSearchResult[] = [];
-
+      let queryToSearch = searchQuery.trim();
+      if (useSemanticSearch) {
+        try {
+          const semanticResult = await enhanceSearchWithSemantics({ query: searchQuery.trim() });
+          setSemanticData(semanticResult);
+          queryToSearch = semanticResult.enhancedQuery;
+        } catch (semanticError) {
+          console.error('Semantic search error:', semanticError);
+        }
+      }
       if (selectedPlatform === 'All' || selectedPlatform === 'Carousell') {
         try {
-          const carousellResults = await searchCarousell(searchQuery.trim());
+          const carousellResults = await searchCarousell(queryToSearch);
           allResults = [...allResults, ...carousellResults];
         } catch (carousellError) {
           console.error('Carousell search error:', carousellError);
@@ -165,14 +188,78 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     }
   };
 
+  // Apply filters to search results
+  const applyFilters = (items: SearchResult[], currentFilters: typeof filters): SearchResult[] => {
+    return items.filter(item => {
+      // Price range filter
+      if (currentFilters.priceRange.min && item.price < parseFloat(currentFilters.priceRange.min)) {
+        return false;
+      }
+      if (currentFilters.priceRange.max && item.price > parseFloat(currentFilters.priceRange.max)) {
+        return false;
+      }
+      
+      // Category filter
+      if (currentFilters.category && item.category && 
+          !item.category.toLowerCase().includes(currentFilters.category.toLowerCase())) {
+        return false;
+      }
+      
+      // Condition filter
+      if (currentFilters.condition && item.condition && 
+          !item.condition.toLowerCase().includes(currentFilters.condition.toLowerCase())) {
+        return false;
+      }
+      
+      // Color filter
+      if (currentFilters.color && item.color && 
+          !item.color.toLowerCase().includes(currentFilters.color.toLowerCase())) {
+        return false;
+      }
+      
+      // Brand filter
+      if (currentFilters.brand && item.brand && 
+          !item.brand.toLowerCase().includes(currentFilters.brand.toLowerCase())) {
+        return false;
+      }
+      
+      // Size filter
+      if (currentFilters.size && item.size && 
+          !item.size.toLowerCase().includes(currentFilters.size.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      priceRange: { min: '', max: '' },
+      category: '',
+      condition: '',
+      color: '',
+      brand: '',
+      size: ''
+    });
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = () => {
+    return filters.priceRange.min || filters.priceRange.max || 
+           filters.category || filters.condition || filters.color || 
+           filters.brand || filters.size;
+  };
+
   const platforms = ['For You', 'All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
 
-  // Filter results based on selected platform
+  // Filter results based on selected platform and additional filters
   const filteredResults = selectedPlatform === 'For You' 
-    ? forYouRecommendations
+    ? applyFilters(forYouRecommendations, filters)
     : selectedPlatform === 'All' 
-    ? searchResults 
-    : searchResults.filter((item: SearchResult) => item.platform === selectedPlatform);
+    ? applyFilters(searchResults, filters)
+    : applyFilters(searchResults.filter((item: SearchResult) => item.platform === selectedPlatform), filters);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -195,9 +282,17 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
           />
           <button
             type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-100 rounded-lg transition"
+            onClick={() => setShowFilters(true)}
+            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition ${
+              hasActiveFilters() 
+                ? 'bg-slate-900 text-white hover:bg-slate-800' 
+                : 'hover:bg-slate-100 text-slate-600'
+            }`}
           >
-            <Filter className="w-5 h-5 text-slate-600" />
+            <Filter className="w-5 h-5" />
+            {hasActiveFilters() && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            )}
           </button>
         </div>
       </form>
@@ -218,6 +313,53 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
         ))}
       </div>
 
+      {/* Active Filters Summary */}
+      {hasActiveFilters() && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {filters.priceRange.min && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              Min: ${filters.priceRange.min}
+            </span>
+          )}
+          {filters.priceRange.max && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              Max: ${filters.priceRange.max}
+            </span>
+          )}
+          {filters.category && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              {filters.category}
+            </span>
+          )}
+          {filters.condition && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              {filters.condition}
+            </span>
+          )}
+          {filters.color && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              {filters.color}
+            </span>
+          )}
+          {filters.brand && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              {filters.brand}
+            </span>
+          )}
+          {filters.size && (
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm">
+              Size: {filters.size}
+            </span>
+          )}
+          <button
+            onClick={clearFilters}
+            className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm hover:bg-red-200 transition"
+          >
+            Clear All
+          </button>
+        </div>
+      )}
+
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
@@ -230,6 +372,41 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
         </div>
       )}
 
+      {semanticData && (
+        <div className="mb-6 bg-gradient-to-r from-[#4a5c3a]/10 to-[#5a6d47]/10 border border-[#9d8566]/30 rounded-2xl p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <Sparkles className="w-5 h-5 text-[#4a5c3a] mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-slate-900 mb-1">AI Search Understanding</h3>
+              <p className="text-sm text-slate-700 mb-3">
+                {semanticData.enhancedQuery !== searchQuery
+                  ? `Searching for: "${semanticData.enhancedQuery}"`
+                  : 'Analyzing your search with AI insights'
+                }
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {semanticData.keywords.slice(0, 5).map((keyword, idx) => (
+                  <span key={idx} className="inline-flex items-center gap-1 text-xs bg-white text-slate-700 px-3 py-1.5 rounded-full border border-slate-200">
+                    <Tag className="w-3 h-3" />
+                    {keyword}
+                  </span>
+                ))}
+                {semanticData.styles.slice(0, 3).map((style, idx) => (
+                  <span key={`style-${idx}`} className="text-xs bg-[#9d8566]/20 text-[#4a5c3a] px-3 py-1.5 rounded-full border border-[#9d8566]/30 font-medium">
+                    {style}
+                  </span>
+                ))}
+                {semanticData.colors.slice(0, 3).map((color, idx) => (
+                  <span key={`color-${idx}`} className="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full">
+                    {color}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showCheckCloset && (
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
@@ -287,10 +464,11 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
               {selectedPlatform === 'For You' ? (
                 <>
                   <strong>{filteredResults.length}</strong> personalized picks based on your wardrobe
+                  {hasActiveFilters() && <span className="text-slate-500"> (filtered)</span>}
                 </>
               ) : (
                 <>
-                  Top <strong>{filteredResults.length}</strong> results
+                  {hasActiveFilters() ? 'Filtered' : 'Top'} <strong>{filteredResults.length}</strong> results
                   {selectedPlatform !== 'All' && ` from ${selectedPlatform}`}
                 </>
               )}
@@ -350,10 +528,189 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
                   <p className="text-lg font-bold text-slate-900">
                     {item.currency === 'SGD' ? 'S$' : '$'}{item.price}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">{item.currency}</p>
+                  <p className="text-xs text-slate-500 mt-1  mb-3">{item.currency}</p>
+                 {item.url && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.url, '_blank');
+                      }}
+                      className="w-full bg-slate-900 text-white text-xs font-medium py-2 rounded-lg hover:bg-slate-800 transition flex items-center justify-center gap-1.5"
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      Shop Now
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filter Modal */}
+      {showFilters && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-slate-900">Filter Results</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Price Range */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Price Range
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={filters.priceRange.min}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        priceRange: { ...prev.priceRange, min: e.target.value }
+                      }))}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={filters.priceRange.max}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        priceRange: { ...prev.priceRange, max: e.target.value }
+                      }))}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Category
+                  </label>
+                  <select
+                    value={filters.category}
+                    onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                  >
+                    <option value="">All Categories</option>
+                    <option value="tops">Tops</option>
+                    <option value="bottoms">Bottoms</option>
+                    <option value="dresses">Dresses</option>
+                    <option value="outerwear">Outerwear</option>
+                    <option value="shoes">Shoes</option>
+                    <option value="accessories">Accessories</option>
+                    <option value="knitwear">Knitwear</option>
+                  </select>
+                </div>
+
+                {/* Condition */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Condition
+                  </label>
+                  <select
+                    value={filters.condition}
+                    onChange={(e) => setFilters(prev => ({ ...prev, condition: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                  >
+                    <option value="">Any Condition</option>
+                    <option value="new">New</option>
+                    <option value="like new">Like New</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="used">Used</option>
+                  </select>
+                </div>
+
+                {/* Color */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Color
+                  </label>
+                  <select
+                    value={filters.color}
+                    onChange={(e) => setFilters(prev => ({ ...prev, color: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                  >
+                    <option value="">Any Color</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
+                    <option value="blue">Blue</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="pink">Pink</option>
+                    <option value="purple">Purple</option>
+                    <option value="brown">Brown</option>
+                    <option value="gray">Gray</option>
+                    <option value="navy">Navy</option>
+                    <option value="cream">Cream</option>
+                  </select>
+                </div>
+
+                {/* Brand */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Brand
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter brand name"
+                    value={filters.brand}
+                    onChange={(e) => setFilters(prev => ({ ...prev, brand: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                  />
+                </div>
+
+                {/* Size */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Size
+                  </label>
+                  <select
+                    value={filters.size}
+                    onChange={(e) => setFilters(prev => ({ ...prev, size: e.target.value }))}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                  >
+                    <option value="">Any Size</option>
+                    <option value="xs">XS</option>
+                    <option value="s">S</option>
+                    <option value="m">M</option>
+                    <option value="l">L</option>
+                    <option value="xl">XL</option>
+                    <option value="xxl">XXL</option>
+                    <option value="one size">One Size</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-6 mt-6 border-t border-slate-200">
+                <button
+                  onClick={clearFilters}
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition"
+                >
+                  Clear All
+                </button>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="flex-1 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 transition"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

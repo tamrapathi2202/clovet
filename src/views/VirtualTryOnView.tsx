@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Upload, Wand2, Loader2, Check, X, Download } from 'lucide-react';
-import { FavoriteItem } from '../lib/supabase';
+import { supabase, FavoriteItem } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { generateVirtualTryOn as generateTryOnAPI, fileToBase64, downloadGeneratedImage } from '../lib/geminiApi';
 
@@ -19,6 +19,37 @@ export default function VirtualTryOnView({ onBack, favorites }: VirtualTryOnProp
   const [userImageFile, setUserImageFile] = useState<File | null>(null);
   const [generatedResult, setGeneratedResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [defaultImage, setDefaultImage] = useState<string | null>(null);
+  const [useDefaultImage, setUseDefaultImage] = useState(false);
+
+  useEffect(() => {
+    loadDefaultImage();
+  }, [user]);
+
+  const loadDefaultImage = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('default_tryon_image')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (data?.default_tryon_image) {
+        setDefaultImage(data.default_tryon_image);
+      }
+    } catch (err) {
+      console.error('Error loading default image:', err);
+    }
+  };
+
+  const handleUseDefaultImage = () => {
+    if (defaultImage) {
+      setUploadedImage(defaultImage);
+      setUseDefaultImage(true);
+      setCurrentStep('upload-image');
+    }
+  };
 
   const handleItemSelect = (item: FavoriteItem) => {
     setSelectedItems(prev => {
@@ -76,9 +107,25 @@ export default function VirtualTryOnView({ onBack, favorites }: VirtualTryOnProp
         clothingItems
       });
 
-      if (result.success) {
-        setGeneratedResult(result.imageUrl || 'https://images.pexels.com/photos/794062/pexels-photo-794062.jpeg?auto=compress&cs=tinysrgb&w=1200');
+      if (result.success && result.imageUrl) {
+        setGeneratedResult(result.imageUrl);
         setCurrentStep('result');
+
+        // Save try-on result to database
+        try {
+          await supabase.from('tryon_results').insert({
+            user_id: user.id,
+            item_id: selectedItems[0].external_id,
+            item_name: selectedItems.map(i => i.item_name).join(', '),
+            item_image_url: selectedItems[0].image_url,
+            user_image_url: uploadedImage || '',
+            result_image_url: result.imageUrl,
+            platform: selectedItems[0].platform,
+            metadata: { items: selectedItems.map(i => ({ id: i.id, name: i.item_name })) }
+          });
+        } catch (saveErr) {
+          console.error('Error saving try-on result:', saveErr);
+        }
       } else {
         throw new Error(result.error || 'Failed to generate virtual try-on');
       }
@@ -196,8 +243,20 @@ export default function VirtualTryOnView({ onBack, favorites }: VirtualTryOnProp
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Upload Your Photo</h2>
-        <p className="text-slate-600">Upload a clear, full-body photo for the best results</p>
+        <p className="text-slate-600">Upload a clear, full-body photo or use your default photo</p>
       </div>
+
+      {defaultImage && !uploadedImage && (
+        <div className="mb-6 text-center">
+          <button
+            onClick={handleUseDefaultImage}
+            className="px-6 py-3 bg-[#9d8566] text-white rounded-xl font-medium hover:bg-[#8b7355] transition inline-flex items-center gap-2"
+          >
+            <Check className="w-4 h-4" />
+            Use Default Photo
+          </button>
+        </div>
+      )}
 
       <div className="mb-6">
         {uploadedImage ? (
@@ -211,11 +270,17 @@ export default function VirtualTryOnView({ onBack, favorites }: VirtualTryOnProp
               onClick={() => {
                 setUploadedImage(null);
                 setUserImageFile(null);
+                setUseDefaultImage(false);
               }}
               className="absolute top-2 right-2 bg-red-500 rounded-full p-1 hover:bg-red-600 transition"
             >
               <X className="w-4 h-4 text-white" />
             </button>
+            {useDefaultImage && (
+              <div className="absolute bottom-2 left-2 bg-[#9d8566] text-white text-xs px-3 py-1 rounded-full">
+                Default Photo
+              </div>
+            )}
           </div>
         ) : (
           <label className="block w-full max-w-md mx-auto">

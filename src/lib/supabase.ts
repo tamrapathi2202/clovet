@@ -14,7 +14,9 @@ export type Profile = {
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  default_tryon_image: string | null;
   style_preferences: Record<string, unknown>;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -59,5 +61,18 @@ export type StyleBundle = {
   item_ids: string[];
   suggested_additions: unknown[];
   style_tags: string[] | null;
+  created_at: string;
+};
+
+export type TryOnResult = {
+  id: string;
+  user_id: string;
+  item_id: string;
+  item_name: string;
+  item_image_url: string;
+  user_image_url: string;
+  result_image_url: string;
+  platform: string | null;
+  metadata: Record<string, unknown>;
   created_at: string;
 };

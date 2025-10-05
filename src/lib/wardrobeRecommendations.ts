@@ -1,6 +1,12 @@
-// Wardrobe-based recommendation service
+// Wardrobe-based recommendation service with Gemini AI integration
 import { supabase, WardrobeItem } from './supabase';
 import { searchCarousell, CarousellSearchResult } from './carousellApi';
+import { 
+  analyzeWardrobeWithGemini, 
+  generateSearchQueries as generateGeminiSearchQueries, 
+  type WardrobeAnalysisPrompt, 
+  type GeminiRecommendation 
+} from './geminiAnalysis';
 
 export type WardrobeFeatureAnalysis = {
   topColors: string[];
@@ -9,15 +15,6 @@ export type WardrobeFeatureAnalysis = {
   commonStyles: string[];
 };
 
-export type RecommendationCache = {
-  data: CarousellSearchResult[];
-  timestamp: number;
-  features: WardrobeFeatureAnalysis;
-};
-
-// Cache for recommendations (30 minutes)
-const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
-let recommendationCache: RecommendationCache | null = null;
 
 /**
  * Analyze user's wardrobe to find top features
@@ -95,6 +92,59 @@ export async function analyzeWardrobeFeatures(userId: string): Promise<WardrobeF
     };
   }
 }
+/**
+ * Get cached recommendations from database
+ * @param userId - User ID
+ * @returns Array of cached recommendations or null if not cached
+ */
+async function getCachedRecommendations(userId: string): Promise<CarousellSearchResult[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('user_recommendations')
+      .select('item_data, rank')
+      .eq('user_id', userId)
+      .order('rank', { ascending: true });
+
+    if (error) throw error;
+    if (!data || data.length === 0) return null;
+
+    return data.map(row => row.item_data as CarousellSearchResult);
+  } catch (error) {
+    console.error('Error loading cached recommendations:', error);
+    return null;
+  }
+}
+
+/**
+ * Save recommendations to database cache
+ * @param userId - User ID
+ * @param recommendations - Recommendations to cache
+ */
+async function saveCachedRecommendations(userId: string, recommendations: CarousellSearchResult[]): Promise<void> {
+  try {
+    // Delete existing cache first
+    await supabase
+      .from('user_recommendations')
+      .delete()
+      .eq('user_id', userId);
+
+    // Insert new recommendations
+    const rows = recommendations.map((item, index) => ({
+      user_id: userId,
+      item_data: item,
+      rank: index
+    }));
+
+    const { error } = await supabase
+      .from('user_recommendations')
+      .insert(rows);
+
+    if (error) throw error;
+    console.log(`Cached ${recommendations.length} recommendations to database`);
+  } catch (error) {
+    console.error('Error saving recommendations to cache:', error);
+  }
+}
 
 /**
  * Generate personalized recommendations based on wardrobe analysis
@@ -103,14 +153,16 @@ export async function analyzeWardrobeFeatures(userId: string): Promise<WardrobeF
  * @returns Array of recommended items
  */
 export async function generatePersonalizedRecommendations(
-  userId: string, 
+  userId: string,
   forceRefresh: boolean = false
 ): Promise<CarousellSearchResult[]> {
-  // Check cache first
-  if (!forceRefresh && recommendationCache && 
-      Date.now() - recommendationCache.timestamp < CACHE_DURATION) {
-    console.log('Returning cached recommendations');
-    return recommendationCache.data;
+  // Check database cache first
+  if (!forceRefresh) {
+    const cached = await getCachedRecommendations(userId);
+    if (cached && cached.length > 0) {
+      console.log('Returning cached recommendations from database');
+      return cached;
+    }
   }
 
   try {
@@ -120,32 +172,67 @@ export async function generatePersonalizedRecommendations(
     const features = await analyzeWardrobeFeatures(userId);
     console.log('Wardrobe analysis:', features);
 
+    // Get wardrobe items for Gemini analysis
+    const { data: wardrobeItems } = await supabase
+      .from('wardrobe_items')
+      .select('*')
+      .eq('user_id', userId);
+
+    let geminiAnalysis: GeminiRecommendation | undefined;
+    let searchQueries: string[] = [];
+
+    // Try Gemini analysis first
+    if (wardrobeItems && wardrobeItems.length > 0) {
+      try {
+        const wardrobeData: WardrobeAnalysisPrompt = {
+          items: wardrobeItems.map((item: WardrobeItem) => ({
+            name: item.name,
+            category: item.category,
+            color: item.color || undefined,
+            brand: item.brand || undefined
+          })),
+          userPreferences: {
+            favoriteColors: features.topColors,
+            preferredStyles: features.commonStyles
+          }
+        };
+
+        geminiAnalysis = await analyzeWardrobeWithGemini(wardrobeData);
+        searchQueries = generateGeminiSearchQueries(geminiAnalysis, 6);
+        console.log('Gemini analysis complete:', geminiAnalysis);
+        console.log('Generated search queries:', searchQueries);
+      } catch (error) {
+        console.warn('Gemini analysis failed, falling back to basic analysis:', error);
+        // Show user-friendly message if API key is missing
+        if (error instanceof Error && error.message.includes('API key not configured')) {
+          console.info('💡 To get AI-powered recommendations, add your Gemini API key to .env file');
+        }
+        // Fallback to basic analysis
+        searchQueries = generateSearchQueries(features);
+      }
+    } else {
+      // Empty wardrobe - use basic queries
+      searchQueries = generateSearchQueries(features);
+    }
+
     const allRecommendations: CarousellSearchResult[] = [];
 
-    // Search based on top colors and categories
-    const searchQueries = generateSearchQueries(features);
-    console.log('Generated search queries:', searchQueries);
-
     // Execute searches for each query (limit to avoid API overload)
-    for (const query of searchQueries.slice(0, 3)) {
+    for (const query of searchQueries.slice(0, 6)) {
       try {
         const results = await searchCarousell(query);
-        // Take first 3-4 results from each search
+        // Take first 4-5 results from each search for more variety
         allRecommendations.push(...results.slice(0, 4));
       } catch (error) {
         console.error(`Error searching for "${query}":`, error);
       }
     }
 
-    // Remove duplicates and limit results
-    const uniqueRecommendations = removeDuplicates(allRecommendations).slice(0, 12);
+    // Remove duplicates and limit results - increased for horizontal scroll
+    const uniqueRecommendations = removeDuplicates(allRecommendations).slice(0, 20);
 
     // Cache the results
-    recommendationCache = {
-      data: uniqueRecommendations,
-      timestamp: Date.now(),
-      features
-    };
+    await saveCachedRecommendations(userId, uniqueRecommendations);
 
     console.log(`Generated ${uniqueRecommendations.length} personalized recommendations`);
     return uniqueRecommendations;
@@ -229,15 +316,20 @@ function removeDuplicates(items: CarousellSearchResult[]): CarousellSearchResult
 }
 
 /**
- * Get cached wardrobe features without regenerating recommendations
+ * Clear recommendation cache from database
+ * @param userId - User ID
  */
-export function getCachedWardrobeFeatures(): WardrobeFeatureAnalysis | null {
-  return recommendationCache?.features || null;
-}
+export async function clearRecommendationCache(userId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('user_recommendations')
+      .delete()
+      .eq('user_id', userId);
 
-/**
- * Clear recommendation cache
- */
-export function clearRecommendationCache(): void {
-  recommendationCache = null;
+    if (error) throw error;
+    console.log('Cleared recommendation cache from database');
+  } catch (error) {
+    console.error('Error clearing recommendation cache:', error);
+    throw error;
+  }
 }
