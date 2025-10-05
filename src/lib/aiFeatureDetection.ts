@@ -20,6 +20,13 @@ export type FeatureDetectionResult = {
  */
 export async function detectClothingFeatures(file: File): Promise<FeatureDetectionResult> {
   try {
+    // Check if API URL is configured
+    if (!AI_MODEL_API_URL || AI_MODEL_API_URL === 'YOUR_ML_MODEL_API_URL') {
+      return {
+        success: false,
+        error: 'AI model API URL not configured. Please add VITE_ML_MODEL_API_URL to your .env file (e.g., http://localhost:5000/predict)'
+      };
+    }
     // Validate file type
     if (!file.type.startsWith('image/')) {
       return {
@@ -71,7 +78,7 @@ export async function detectClothingFeatures(file: File): Promise<FeatureDetecti
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
         success: false,
-        error: 'Unable to connect to AI model. Please check: 1) Model server is running on localhost:5000, 2) CORS is enabled on the server'
+        error: `Unable to connect to AI model at ${AI_MODEL_API_URL}. Please check: 1) Model server is running, 2) CORS is enabled on the server, 3) URL is correct in your .env file`
       };
     }
 
@@ -79,7 +86,15 @@ export async function detectClothingFeatures(file: File): Promise<FeatureDetecti
     if (error instanceof TypeError && (error.message.includes('CORS') || error.message.includes('cross-origin'))) {
       return {
         success: false,
-        error: 'CORS error: AI model server needs to allow requests from your app. Please enable CORS on localhost:5000'
+        error: `CORS error: AI model server at ${AI_MODEL_API_URL} needs to allow requests from your app. Please enable CORS headers`
+      };
+    }
+
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('NetworkError')) {
+      return {
+        success: false,
+        error: `Network error: Cannot reach AI model server at ${AI_MODEL_API_URL}. Please check if the server is running and accessible`
       };
     }
 

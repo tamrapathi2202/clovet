@@ -1,6 +1,7 @@
 // Gemini API service for intelligent wardrobe analysis and recommendations
+import { GoogleGenAI } from "@google/genai";
+
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 export type WardrobeAnalysisPrompt = {
   items: Array<{
@@ -36,34 +37,16 @@ export async function analyzeWardrobeWithGemini(wardrobeData: WardrobeAnalysisPr
       throw new Error('Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
     }
 
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
     const prompt = generateWardrobeAnalysisPrompt(wardrobeData);
     
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        }
-      })
+    // Use the official Google GenAI SDK
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ parts: [{ text: prompt }] }],
     });
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const generatedText = response.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!generatedText) {
       throw new Error('No response from Gemini API');
@@ -224,22 +207,3 @@ function extractKeywords(text: string): string {
   return keywords;
 }
 
-/**
- * Test function to validate Gemini API connectivity
- */
-export async function testGeminiConnection(): Promise<boolean> {
-  try {
-    const testData: WardrobeAnalysisPrompt = {
-      items: [
-        { name: 'Black T-shirt', category: 'Tops', color: 'Black' },
-        { name: 'Blue Jeans', category: 'Bottoms', color: 'Blue' }
-      ]
-    };
-
-    await analyzeWardrobeWithGemini(testData);
-    return true;
-  } catch (error) {
-    console.error('Gemini API test failed:', error);
-    return false;
-  }
-}
