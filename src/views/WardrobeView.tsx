@@ -99,11 +99,11 @@ export default function WardrobeView() {
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition" />
               </div>
               <div className="p-3">
-                <h3 className="font-medium text-slate-900 text-sm truncate">{item.name}</h3>
+                <h3 className="font-medium text-slate-900 text-sm truncate" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{item.name}</h3>
                 {item.brand && (
-                  <p className="text-xs text-slate-500 truncate">{item.brand}</p>
+                  <p className="text-xs text-slate-500 truncate" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(242, 109, 22)' }}>{item.brand}</p>
                 )}
-                <p className="text-xs text-slate-400 mt-1">Worn {item.wear_count} times</p>
+                <p className="text-xs text-slate-400 mt-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Worn {item.wear_count} times</p>
               </div>
             </div>
           ))}

@@ -61,7 +61,7 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
   return (
     <div className="max-w-7xl mx-auto px-4 py-6" style={{ backgroundColor: 'rgba(255, 251, 247, 1)' }}>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Favorites</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Favorites</h2>
         <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.75rem' }}>
           {favorites.length} saved {favorites.length === 1 ? 'item' : 'items'}
         </p>

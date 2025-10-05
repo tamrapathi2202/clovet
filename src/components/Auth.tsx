@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
+
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -29,20 +30,22 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-stone-100">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'rgb(248, 242, 237)' }}>
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8" style={{ borderColor: 'rgb(45, 80, 22)', borderWidth: '1px', borderStyle: 'solid' }}>
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Georgia, serif' }}>
+            <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
               Clovet
             </h1>
-            <p className="text-slate-600">Sustainable style, smarter shopping</p>
+            <p style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
+              Sustainable style, smarter shopping
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {isSignUp && (
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
+                <label htmlFor="fullName" className="block text-sm font-medium mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
                   Full Name
                 </label>
                 <input
@@ -51,14 +54,15 @@ export default function Auth() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition"
+                  className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition"
+                  style={{ border: '1px solid rgb(45, 80, 22)' }}
                   placeholder="Enter your name"
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
                 Email
               </label>
               <input
@@ -67,13 +71,14 @@ export default function Auth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition"
+                style={{ border: '1px solid rgb(45, 80, 22)' }}
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
                 Password
               </label>
               <input
@@ -83,13 +88,14 @@ export default function Auth() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition"
+                style={{ border: '1px solid rgb(45, 80, 22)' }}
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: 'rgb(248, 242, 237)', border: '1px solid rgb(242, 109, 22)', color: 'rgb(45, 80, 22)', fontFamily: 'var(--font-warbler)' }}>
                 {error}
               </div>
             )}
@@ -97,7 +103,8 @@ export default function Auth() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 text-white py-3 rounded-lg font-medium hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)', fontFamily: 'var(--font-warbler)' }}
             >
               {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
             </button>
@@ -110,7 +117,8 @@ export default function Auth() {
                 setIsSignUp(!isSignUp);
                 setError('');
               }}
-              className="text-slate-600 hover:text-slate-900 text-sm transition"
+              className="text-sm transition"
+              style={{ color: 'rgb(45, 80, 22)', fontFamily: 'var(--font-warbler)' }}
             >
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>

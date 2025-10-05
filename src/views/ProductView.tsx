@@ -54,11 +54,9 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
   const loadProduct = async () => {
     setLoading(true);
     
-    // First try to get product from search results cache
     const cachedProduct = searchResults.find(item => item.id === productId);
     
     if (cachedProduct) {
-      // Convert CarousellSearchResult to Product format
       setProduct({
         id: cachedProduct.id,
         name: cachedProduct.name,
@@ -82,7 +80,6 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
       return;
     }
 
-    // Fallback to API cache
     const apiCachedProduct = getCarousellProduct(productId);
     if (apiCachedProduct) {
       setProduct({
@@ -108,7 +105,6 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
       return;
     }
 
-    // Fallback to mock data if not found in cache
     await new Promise(resolve => setTimeout(resolve, 300));
     setProduct({
       id: productId,
@@ -200,76 +196,60 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'rgb(248, 242, 237)' }}>
+        <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: 'rgb(248, 242, 237)', borderTopColor: 'rgb(45, 80, 22)' }} />
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-600">Product not found</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'rgb(248, 242, 237)' }}>
+        <p style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Product not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'rgb(248, 242, 237)' }}>
+      <div className="bg-white sticky top-0 z-50" style={{ borderBottom: '1px solid rgb(45, 80, 22)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-slate-100 rounded-lg transition"
-          >
-            <ArrowLeft className="w-6 h-6 text-slate-700" />
+          <button onClick={onBack} className="p-2 rounded-lg transition hover:bg-slate-100">
+            <ArrowLeft className="w-6 h-6" style={{ color: 'rgb(45, 80, 22)' }} />
           </button>
-          <h1 className="text-xl font-bold text-slate-900">Product Details</h1>
-          <button
-            onClick={toggleFavorite}
-            className="p-2 hover:bg-slate-100 rounded-lg transition"
-          >
-            <Heart
-              className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-700'}`}
-            />
+          <h1 className="text-xl font-bold" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Product Details</h1>
+          <button onClick={toggleFavorite} className="p-2 rounded-lg transition hover:bg-slate-100">
+            <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} style={!isFavorite ? { color: 'rgb(242, 109, 22)' } : {}} />
           </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full aspect-[3/4] object-cover"
-            />
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm" style={{ border: '1px solid rgb(45, 80, 22)' }}>
+            <img src={product.image_url} alt={product.name} className="w-full aspect-[3/4] object-cover" />
           </div>
 
           <div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm mb-4">
+            <div className="bg-white rounded-2xl p-6 shadow-sm mb-4" style={{ border: '1px solid rgb(45, 80, 22)' }}>
               <div className="flex items-start gap-3 mb-4">
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">{product.name}</h2>
-                  {product.brand && (
-                    <p className="text-slate-600 mb-1">{product.brand}</p>
-                  )}
+                  <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.name}</h2>
+                  {product.brand && <p style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.brand}</p>}
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-slate-900">
-                    {product.currency === 'SGD' ? 'S$' : '$'}{product.price}
-                  </p>
-                  <p className="text-sm text-slate-500">{product.currency}</p>
+                  <p className="text-3xl font-bold" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(242, 109, 22)' }}>{product.currency === 'SGD' ? 'S$' : '$'}{product.price}</p>
+                  <p className="text-sm" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.currency}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mb-6">
-                <div className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                <div className="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2" style={{ backgroundColor: 'rgb(248, 242, 237)', color: 'rgb(45, 80, 22)', fontFamily: 'var(--font-warbler)' }}>
                   <Store className="w-4 h-4" />
                   {product.platform}
                 </div>
                 {product.condition && (
-                  <div className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2">
+                  <div className="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2" style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)', fontFamily: 'var(--font-warbler)' }}>
                     <Package className="w-4 h-4" />
                     {product.condition}
                   </div>
@@ -279,64 +259,55 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
               <div className="space-y-3 mb-6">
                 {product.size && (
                   <div className="flex items-center gap-3">
-                    <Ruler className="w-5 h-5 text-slate-500" />
+                    <Ruler className="w-5 h-5" style={{ color: 'rgb(242, 109, 22)' }} />
                     <div>
-                      <p className="text-sm text-slate-500">Size</p>
-                      <p className="font-medium text-slate-900">{product.size}</p>
+                      <p className="text-sm" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Size</p>
+                      <p className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.size}</p>
                     </div>
                   </div>
                 )}
 
                 {product.seller && (
                   <div className="flex items-center gap-3">
-                    <Store className="w-5 h-5 text-slate-500" />
+                    <Store className="w-5 h-5" style={{ color: 'rgb(242, 109, 22)' }} />
                     <div>
-                      <p className="text-sm text-slate-500">Seller</p>
-                      <p className="font-medium text-slate-900">{product.seller}</p>
+                      <p className="text-sm" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Seller</p>
+                      <p className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.seller}</p>
                     </div>
                   </div>
                 )}
 
                 {product.posted_date && (
                   <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-slate-500" />
+                    <Calendar className="w-5 h-5" style={{ color: 'rgb(242, 109, 22)' }} />
                     <div>
-                      <p className="text-sm text-slate-500">Listed</p>
-                      <p className="font-medium text-slate-900">
-                        {new Date(product.posted_date).toLocaleDateString('en-US', {
-                          month: 'long',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
+                      <p className="text-sm" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Listed</p>
+                      <p className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
+                        {new Date(product.posted_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
                 )}
               </div>
 
-              <a
-                href={product.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-slate-900 text-white py-4 rounded-xl font-semibold hover:bg-slate-800 transition flex items-center justify-center gap-2"
-              >
+              <a href={product.url} target="_blank" rel="noopener noreferrer" className="w-full py-4 rounded-xl font-semibold transition flex items-center justify-center gap-2" style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)', fontFamily: 'var(--font-warbler)' }}>
                 View on {product.platform}
                 <ExternalLink className="w-5 h-5" />
               </a>
             </div>
 
             {similarInCloset.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+              <div className="rounded-xl p-4" style={{ backgroundColor: 'rgb(248, 242, 237)', border: '1px solid rgb(242, 109, 22)' }}>
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: 'rgb(242, 109, 22)' }} />
                   <div>
-                    <h3 className="font-semibold text-slate-900 mb-1">Check Your Closet</h3>
-                    <p className="text-sm text-slate-700 mb-3">
+                    <h3 className="font-semibold mb-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Check Your Closet</h3>
+                    <p className="text-sm mb-3" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
                       You have <strong>{similarInCloset.length} similar items</strong> in your wardrobe
                     </p>
                     <div className="flex gap-2">
                       {similarInCloset.map((item) => (
-                        <div key={item.id} className="w-16 h-16 rounded-lg overflow-hidden border-2 border-amber-300">
+                        <div key={item.id} className="w-16 h-16 rounded-lg overflow-hidden border-2" style={{ borderColor: 'rgb(242, 109, 22)' }}>
                           <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                         </div>
                       ))}
@@ -349,56 +320,56 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Description</h3>
-            <p className="text-slate-700 leading-relaxed">{product.description}</p>
+          <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid rgb(45, 80, 22)' }}>
+            <h3 className="text-lg font-bold mb-4" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Description</h3>
+            <p className="leading-relaxed" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.description}</p>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Details</h3>
+            <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid rgb(45, 80, 22)' }}>
+              <h3 className="text-lg font-bold mb-4" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Details</h3>
               <div className="space-y-3">
                 {product.category && (
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Category</span>
-                    <span className="font-medium text-slate-900">{product.category}</span>
+                    <span style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Category</span>
+                    <span className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.category}</span>
                   </div>
                 )}
                 {product.color && (
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Color</span>
-                    <span className="font-medium text-slate-900">{product.color}</span>
+                    <span style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Color</span>
+                    <span className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.color}</span>
                   </div>
                 )}
                 {product.material && (
                   <div className="flex justify-between">
-                    <span className="text-slate-600">Material</span>
-                    <span className="font-medium text-slate-900">{product.material}</span>
+                    <span style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Material</span>
+                    <span className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.material}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {product.measurements && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Measurements</h3>
+              <div className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid rgb(45, 80, 22)' }}>
+                <h3 className="text-lg font-bold mb-4" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>Measurements</h3>
                 <div className="space-y-3">
                   {product.measurements.bust && (
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Bust</span>
-                      <span className="font-medium text-slate-900">{product.measurements.bust}</span>
+                      <span style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Bust</span>
+                      <span className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.measurements.bust}</span>
                     </div>
                   )}
                   {product.measurements.waist && (
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Waist</span>
-                      <span className="font-medium text-slate-900">{product.measurements.waist}</span>
+                      <span style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Waist</span>
+                      <span className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.measurements.waist}</span>
                     </div>
                   )}
                   {product.measurements.length && (
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Length</span>
-                      <span className="font-medium text-slate-900">{product.measurements.length}</span>
+                      <span style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', opacity: 0.7 }}>Length</span>
+                      <span className="font-medium" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{product.measurements.length}</span>
                     </div>
                   )}
                 </div>
@@ -407,17 +378,15 @@ export default function ProductView({ productId, onBack }: ProductViewProps) {
           </div>
         </div>
 
-        <div className="mt-8 bg-gradient-to-r from-violet-50 to-fuchsia-50 border border-violet-200 rounded-2xl p-6">
+        <div className="mt-8 rounded-2xl p-6" style={{ backgroundColor: 'rgb(248, 242, 237)', border: '1px solid rgb(45, 80, 22)' }}>
           <div className="flex items-start gap-4">
-            <Sparkles className="w-6 h-6 text-violet-600 mt-1" />
+            <Sparkles className="w-6 h-6 mt-1" style={{ color: 'rgb(242, 109, 22)' }} />
             <div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">AI Try-On Available</h3>
-              <p className="text-slate-700 mb-4">
+              <h3 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>AI Try-On Available</h3>
+              <p className="mb-4" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
                 See how this item would look on you before buying. Upload your photo or use an AI-generated model.
               </p>
-              <button className="bg-white text-violet-700 px-6 py-3 rounded-lg font-semibold hover:bg-violet-50 transition">
-                Try It On
-              </button>
+              <button className="px-6 py-3 rounded-lg font-semibold transition" style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)', fontFamily: 'var(--font-warbler)' }}>Try It On</button>
             </div>
           </div>
         </div>
