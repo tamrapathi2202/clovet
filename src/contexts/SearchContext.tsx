@@ -1,22 +1,28 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { CarousellSearchResult } from '../lib/carousellApi';
 
+// Unified search result type
+export type UnifiedSearchResult = CarousellSearchResult;
+
 type SearchContextType = {
-  searchResults: CarousellSearchResult[];
-  setSearchResults: (results: CarousellSearchResult[]) => void;
+  searchResults: UnifiedSearchResult[];
+  setSearchResults: (results: UnifiedSearchResult[]) => void;
   currentSearchQuery: string;
   setCurrentSearchQuery: (query: string) => void;
   selectedPlatform: string;
   setSelectedPlatform: (platform: string) => void;
+  forYouRecommendations: UnifiedSearchResult[];
+  setForYouRecommendations: (results: UnifiedSearchResult[]) => void;
   clearSearchData: () => void;
 };
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export function SearchProvider({ children }: { children: ReactNode }) {
-  const [searchResults, setSearchResults] = useState<CarousellSearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<UnifiedSearchResult[]>([]);
   const [currentSearchQuery, setCurrentSearchQuery] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('All');
+  const [forYouRecommendations, setForYouRecommendations] = useState<UnifiedSearchResult[]>([]);
 
   const clearSearchData = () => {
     setSearchResults([]);
@@ -32,6 +38,8 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       setCurrentSearchQuery,
       selectedPlatform,
       setSelectedPlatform,
+      forYouRecommendations,
+      setForYouRecommendations,
       clearSearchData
     }}>
       {children}

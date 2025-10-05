@@ -9,10 +9,11 @@ import FavoritesView from './views/FavoritesView';
 import WardrobeView from './views/WardrobeView';
 import ProductView from './views/ProductView';
 import VirtualTryOnView from './views/VirtualTryOnView';
+import ProfileView from './views/ProfileView';
 
 function AppContent() {
   const { user, loading } = useAuth();
-  const [currentView, setCurrentView] = useState<'home' | 'search' | 'favorites' | 'wardrobe' | 'product' | 'virtual-try-on'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'explore' | 'favorites' | 'wardrobe' | 'product' | 'virtual-try-on' | 'profile'>('home');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [favoriteItems, setFavoriteItems] = useState<any[]>([]);
 
@@ -37,7 +38,7 @@ function AppContent() {
   };
 
   const handleBackFromProduct = () => {
-    setCurrentView('search'); // Go back to search instead of home
+    setCurrentView('home'); // Go back to search instead of home
     setSelectedProductId(null);
   };
 
@@ -47,7 +48,7 @@ function AppContent() {
   };
 
   const handleBackFromVirtualTryOn = () => {
-    setCurrentView('favorites');
+    setCurrentView('home');
   };
 
   if (currentView === 'product' && selectedProductId) {
@@ -58,12 +59,16 @@ function AppContent() {
     return <VirtualTryOnView onBack={handleBackFromVirtualTryOn} favorites={favoriteItems} />;
   }
 
-  return (
-    <Layout currentView={currentView === 'product' ? 'favorites' : currentView as 'home' | 'search' | 'favorites' | 'wardrobe'} onNavigate={setCurrentView}>
-      {currentView === 'home' && <HomeView onProductClick={handleProductClick} />}
-      {currentView === 'search' && <SearchView onProductClick={handleProductClick} />}
+return (
+    <Layout
+      currentView={currentView}
+      onNavigate={setCurrentView}
+    >
+      {currentView === 'home' && <HomeView onProductClick={handleProductClick} onNavigate={setCurrentView} />}
+      {currentView === 'explore' && <SearchView onProductClick={handleProductClick} />}
       {currentView === 'favorites' && <FavoritesView onProductClick={handleProductClick} onVirtualTryOnClick={handleVirtualTryOnClick} />}
       {currentView === 'wardrobe' && <WardrobeView />}
+      {currentView === 'profile' && <ProfileView />}
     </Layout>
   );
 }

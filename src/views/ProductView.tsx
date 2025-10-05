@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Heart, ExternalLink, Package, Store, Calendar, Tag, Ruler, Sparkles, AlertCircle } from 'lucide-react';
-import { supabase, FavoriteItem, WardrobeItem } from '../lib/supabase';
+import { ArrowLeft, Heart, ExternalLink, Package, Store, Calendar, Ruler, Sparkles, AlertCircle } from 'lucide-react';
+import { supabase, WardrobeItem } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { getCarousellProduct } from '../lib/carousellApi';
 import { useSearch } from '../contexts/SearchContext';

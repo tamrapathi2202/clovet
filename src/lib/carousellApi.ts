@@ -1,5 +1,5 @@
 // Carousell API service with caching
-const RAPIDAPI_KEY = '878253460dmshe94c23d41a36d08p10d77bjsn453c137f0568';
+const RAPIDAPI_KEY = '486dba2e3cmsh62cf3a0e02ec594p1c21f2jsn6d89d32d6b12';
 const RAPIDAPI_HOST = 'carousell.p.rapidapi.com';
 
 export type CarousellSearchResult = {

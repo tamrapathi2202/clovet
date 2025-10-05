@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Search, Sparkles, Filter, Heart, AlertCircle } from 'lucide-react';
-import { searchCarousell, type CarousellSearchResult } from '../lib/carousellApi';
-import { useSearch } from '../contexts/SearchContext';
+import { searchCarousell } from '../lib/carousellApi';
+import { useSearch, type UnifiedSearchResult } from '../contexts/SearchContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
-type SearchResult = CarousellSearchResult;
+type SearchResult = UnifiedSearchResult;
 
 type SearchViewProps = {
   onProductClick: (productId: string) => void;
@@ -18,7 +18,8 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     currentSearchQuery, 
     setCurrentSearchQuery,
     selectedPlatform,
-    setSelectedPlatform 
+    setSelectedPlatform,
+    forYouRecommendations 
   } = useSearch();
   const { user } = useAuth();
   
@@ -107,9 +108,17 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     setError(null);
 
     try {
-      // Call the Carousell API (no rate limiting)
-      const carousellResults = await searchCarousell(searchQuery.trim());
-      
+      let allResults: UnifiedSearchResult[] = [];
+
+      if (selectedPlatform === 'All' || selectedPlatform === 'Carousell') {
+        try {
+          const carousellResults = await searchCarousell(searchQuery.trim());
+          allResults = [...allResults, ...carousellResults];
+        } catch (carousellError) {
+          console.error('Carousell search error:', carousellError);
+        }
+      }
+
       // Check if user is searching for items they might already have
       if (searchQuery.toLowerCase().includes('black blazer') ||
           searchQuery.toLowerCase().includes('blazer')) {
@@ -118,7 +127,7 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
       }
 
       // Update context with results
-      setSearchResults(carousellResults);
+      setSearchResults(allResults);
       setCurrentSearchQuery(searchQuery.trim());
       
       // Reload favorites to include new results
@@ -156,10 +165,12 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     }
   };
 
-  const platforms = ['All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
+  const platforms = ['For You', 'All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
 
   // Filter results based on selected platform
-  const filteredResults = selectedPlatform === 'All' 
+  const filteredResults = selectedPlatform === 'For You' 
+    ? forYouRecommendations
+    : selectedPlatform === 'All' 
     ? searchResults 
     : searchResults.filter((item: SearchResult) => item.platform === selectedPlatform);
 
@@ -257,22 +268,41 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
         <div className="text-center py-20">
           <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            No Results Found
+            {selectedPlatform === 'For You' 
+              ? 'Building Your Recommendations' 
+              : 'No Results Found'
+            }
           </h3>
           <p className="text-slate-600 max-w-md mx-auto">
-            No items found for "{selectedPlatform}". Try selecting "All" platforms or a different platform.
+            {selectedPlatform === 'For You' 
+              ? 'Add more items to your wardrobe to get personalized recommendations based on your style preferences.' 
+              : `No items found for "${selectedPlatform}". Try selecting "All" platforms or a different platform.`
+            }
           </p>
         </div>
       ) : (
         <div>
           <div className="flex items-center justify-between mb-4">
             <p className="text-slate-600">
-              Top <strong>{filteredResults.length}</strong> results
-              {selectedPlatform !== 'All' && ` from ${selectedPlatform}`}
+              {selectedPlatform === 'For You' ? (
+                <>
+                  <strong>{filteredResults.length}</strong> personalized picks based on your wardrobe
+                </>
+              ) : (
+                <>
+                  Top <strong>{filteredResults.length}</strong> results
+                  {selectedPlatform !== 'All' && ` from ${selectedPlatform}`}
+                </>
+              )}
             </p>
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Sparkles className="w-4 h-4" />
-              <span>Sorted by relevance</span>
+              <span>
+                {selectedPlatform === 'For You' 
+                  ? 'Based on your style' 
+                  : 'Sorted by relevance'
+                }
+              </span>
             </div>
           </div>
 

@@ -1,21 +1,22 @@
-import { Home, Search, Heart, ShoppingBag, Menu, User } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { Home, Search, Heart, ShoppingBag, User } from 'lucide-react';
 
 type LayoutProps = {
   children: React.ReactNode;
-  currentView: 'home' | 'search' | 'favorites' | 'wardrobe';
-  onNavigate: (view: 'home' | 'search' | 'favorites' | 'wardrobe') => void;
+  currentView: 'home' | 'explore' | 'favorites' | 'wardrobe' | 'product' | 'virtual-try-on' | 'profile';
+  onNavigate: (view: 'home' | 'explore' | 'favorites' | 'wardrobe' | 'product' | 'virtual-try-on' | 'profile') => void;
+  onShowOnboarding?: () => void;
 };
 
 export default function Layout({ children, currentView, onNavigate }: LayoutProps) {
-  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <button className="p-2 hover:bg-slate-100 rounded-lg transition">
-            <Menu className="w-6 h-6 text-slate-700" />
+          <button
+            className="p-2 hover:bg-slate-100 rounded-lg transition"
+            title="Show onboarding guide"
+          >
           </button>
 
           <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Georgia, serif' }}>
@@ -23,8 +24,9 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </h1>
 
           <button
-            onClick={() => signOut()}
+            onClick={() => onNavigate('profile')}
             className="p-2 hover:bg-slate-100 rounded-lg transition"
+            title="Profile"
           >
             <User className="w-6 h-6 text-slate-700" />
           </button>
@@ -48,13 +50,13 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
           </button>
 
           <button
-            onClick={() => onNavigate('search')}
+            onClick={() => onNavigate('explore')}
             className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition ${
-              currentView === 'search' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
+              currentView === 'explore' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             <Search className="w-6 h-6" />
-            <span className="text-xs font-medium">Search</span>
+            <span className="text-xs font-medium">Explore</span>
           </button>
 
           <button
@@ -72,6 +74,7 @@ export default function Layout({ children, currentView, onNavigate }: LayoutProp
             className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition ${
               currentView === 'wardrobe' ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'
             }`}
+            data-tour-step="nav-wardrobe"
           >
             <ShoppingBag className="w-6 h-6" />
             <span className="text-xs font-medium">Wardrobe</span>
