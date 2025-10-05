@@ -24,7 +24,18 @@
   --font-warbler: "warbler-font-family-1759582272-0", sans-serif;
   --font-tangerine: "tangerine", cursive;
 }
+* {
+  font-family: 'var(--font-warbler)';
+}
 .ffinput::placeholder {
     color: rgb(108, 134, 110); 
     opacity: 1; 
   }
+
+.orangecolor{
+  color: rgb(242, 109, 22);
+}
+
+.whitecolor{
+  background-color: rgba(255, 251, 247, 1);
+}
