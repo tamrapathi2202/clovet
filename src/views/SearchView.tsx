@@ -156,7 +156,9 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     }
   };
 
-  const platforms = ['All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
+  const platforms = ['All', 'Carousell', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'].map(platform => (
+    <span key={platform} style={{ color: 'rgba(253,249,245,1)', fontFamily: 'var(--font-warbler)'}}>{platform}</span>
+  ));
 
   // Filter results based on selected platform
   const filteredResults = selectedPlatform === 'All' 
@@ -164,29 +166,30 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
     : searchResults.filter((item: SearchResult) => item.platform === selectedPlatform);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-6" style={{ backgroundColor: 'rgba(253, 249, 245, 1)' }}>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Style Semantics Search</h2>
-        <p className="text-slate-600">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2" style={{ color: 'rgb(45, 80, 22)', fontFamily: 'var(--font-warbler)'}}>Style Semantics Search</h2>
+        <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.75rem' }}>
           Search with natural language or trendy references
         </p>
       </div>
 
       <form onSubmit={handleSearch} className="mb-6">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder='Try "coastal granddaughter core" or "vintage leather jacket"'
-            className="w-full pl-12 pr-12 py-4 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent text-slate-900 placeholder-slate-400"
-          />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" style={{ color: 'rgb(242,109,22)' }} />
+         <input
+  type="text"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  placeholder='Try "coastal granddaughter core" or "vintage leather jacket"'  
+  className="ffinput w-full pl-12 pr-12 py-4 bg-white rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-slate-900 placeholder-slate-400"
+  style={{ border: '1px solid rgb(45, 80, 22)', focusRing: 'rgb(45, 80, 22)', color: 'rgb(45, 80, 22)', fontFamily: 'var(--font-warbler)' }}
+/>
           <button
             type="button"
             className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-100 rounded-lg transition"
           >
-            <Filter className="w-5 h-5 text-slate-600" />
+            <Filter className="w-5 h-5 text-slate-600" style={{ color: 'rgb(242,109,22)' }} />
           </button>
         </div>
       </form>
@@ -194,16 +197,13 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
       <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
         {platforms.map((platform) => (
           <button
-            key={platform}
-            onClick={() => setSelectedPlatform(platform)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-              selectedPlatform === platform
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            {platform}
-          </button>
+  key={platform}
+  onClick={() => setSelectedPlatform(platform)}
+  className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition text-white"
+  style={{ backgroundColor: 'rgb(45, 80, 22)' }}
+>
+  {platform}
+</button>
         ))}
       </div>
 
@@ -245,33 +245,33 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
         </div>
       ) : filteredResults.length === 0 && searchResults.length === 0 ? (
         <div className="text-center py-20">
-          <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+          <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" style={{ color: 'rgb(242,109,22)' }} />
+          <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>
             Start Your Search
           </h3>
-          <p className="text-slate-600 max-w-md mx-auto">
+          <p className="text-slate-600 max-w-md mx-auto" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
             Use natural language to describe what you're looking for. Try "coastal granddaughter core" or "vintage leather jacket"
           </p>
         </div>
       ) : filteredResults.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20" style={{ color: 'rgb(242,109,22)' }}>
           <Search className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>
             No Results Found
           </h3>
-          <p className="text-slate-600 max-w-md mx-auto">
+          <p className="text-slate-600 max-w-md mx-auto" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
             No items found for "{selectedPlatform}". Try selecting "All" platforms or a different platform.
           </p>
         </div>
       ) : (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-slate-600">
+            <p className="text-slate-600" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
               Top <strong>{filteredResults.length}</strong> results
               {selectedPlatform !== 'All' && ` from ${selectedPlatform}`}
             </p>
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Sparkles className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-sm text-slate-600" style={{ color: 'rgb(45, 80, 22)', fontFamily: 'var(--font-tangerine)', fontSize: '1.25rem' }}>
+              <Sparkles className="w-4 h-4" style={{ color: 'rgb(242,109,22)' }} />
               <span>Sorted by relevance</span>
             </div>
           </div>
@@ -302,25 +302,25 @@ export default function SearchView({ onProductClick }: SearchViewProps) {
                         className={`w-4 h-4 ${
                           favoriteItems.has(item.id) 
                             ? 'text-red-500 fill-red-500' 
-                            : 'text-slate-700'
-                        }`} 
+                            : 'text-slate-700' 
+                        }`} style={{color: 'rgb(242,109,22)'}}
                       />
                     </button>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
-                    <span className="text-xs text-white font-medium bg-slate-900 bg-opacity-50 px-2 py-1 rounded">
+                    <span className="text-xs text-white font-medium bg-slate-900 bg-opacity-50 px-2 py-1 rounded" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(251, 251, 251)' }}>
                       {item.platform}
                     </span>
                   </div>
                 </div>
                 <div className="p-3">
-                  <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2">
+                  <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
                     {item.name}
                   </h3>
-                  <p className="text-lg font-bold text-slate-900">
+                  <p className="text-lg font-bold text-slate-900" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(242, 109, 22)', fontSize: '1.75rem' }}>
                     {item.currency === 'SGD' ? 'S$' : '$'}{item.price}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">{item.currency}</p>
+                  <p className="text-xs text-slate-500 mt-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>{item.currency}</p>
                 </div>
               </div>
             ))}

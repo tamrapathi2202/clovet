@@ -31,7 +31,9 @@ export default function WardrobeView() {
     }
   };
 
-  const categories = ['All', 'Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Shoes', 'Accessories'];
+  const categories = ['All', 'Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Shoes', 'Accessories'].map(category => (
+    <span key={category} style={{ color: 'rgba(255, 251, 247, 1)', fontFamily: 'var(--font-warbler)' }}>{category}</span>
+  ));
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const filteredItems = selectedCategory === 'All'
@@ -41,8 +43,8 @@ export default function WardrobeView() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">My Wardrobe</h2>
-        <p className="text-slate-600">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>My Wardrobe</h2>
+        <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.75rem' }}>
           {items.length} {items.length === 1 ? 'item' : 'items'} in your collection
         </p>
       </div>
@@ -50,16 +52,13 @@ export default function WardrobeView() {
       <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
         {categories.map((category) => (
           <button
-            key={category}
-            onClick={() => setSelectedCategory(category)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-              selectedCategory === category
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            {category}
-          </button>
+  key={category}
+  onClick={() => setSelectedCategory(category)}
+  className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition"
+  style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)' }}
+>
+  {category}
+</button>
         ))}
       </div>
 
@@ -69,19 +68,20 @@ export default function WardrobeView() {
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="text-center py-20">
-          <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            {selectedCategory === 'All' ? 'Your wardrobe is empty' : `No ${selectedCategory.toLowerCase()} yet`}
-          </h3>
-          <p className="text-slate-600 mb-6">
+  <ShoppingBag className="w-16 h-16 mx-auto mb-4" style={{ color: 'rgb(242, 109, 22)' }} />
+  <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
+    {selectedCategory === 'All' ? 'Your wardrobe is empty' : `No ${selectedCategory.toLowerCase()} yet`}
+  </h3>
+          <p className="text-slate-600 mb-6" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
             Start adding items to see your collection
           </p>
           <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition"
-          >
-            Add Your First Item
-          </button>
+  onClick={() => setShowAddModal(true)}
+  className="px-6 py-3 rounded-lg font-medium transition"
+  style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)' }}
+>
+  Add Your First Item
+</button>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -111,11 +111,12 @@ export default function WardrobeView() {
       )}
 
       <button
-        onClick={() => setShowAddModal(true)}
-        className="fixed bottom-24 right-6 bg-slate-900 text-white p-4 rounded-full shadow-lg hover:bg-slate-800 transition"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
+  onClick={() => setShowAddModal(true)}
+  className="fixed bottom-24 right-6 p-4 rounded-full shadow-lg transition"
+  style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)' }}
+>
+  <Plus className="w-6 h-6" />
+</button>
 
       {showAddModal && (
         <AddItemModal
@@ -323,7 +324,7 @@ function AddItemModal({ onClose, onItemAdded }: { onClose: () => void; onItemAdd
 
 function ShoppingBag({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="rgb(242,109,22)">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
     </svg>
   );

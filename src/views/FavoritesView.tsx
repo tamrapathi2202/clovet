@@ -49,7 +49,9 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
     }
   };
 
-  const platforms = ['All', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'];
+  const platforms = ['All', 'Depop', 'Poshmark', 'ThredUp', 'Vestiaire', 'eBay'].map(platform => (
+    <span key={platform} style={{ color: 'rgba(255, 251, 247, 1)', fontFamily: 'var(--font-warbler)'}}>{platform}</span>
+  ));
   const [selectedPlatform, setSelectedPlatform] = useState('All');
 
   const filteredFavorites = selectedPlatform === 'All'
@@ -57,27 +59,24 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
     : favorites.filter(item => item.platform === selectedPlatform);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-6" style={{ backgroundColor: 'rgba(255, 251, 247, 1)' }}>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Favorites</h2>
-        <p className="text-slate-600">
+        <p className="text-slate-600" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.75rem' }}>
           {favorites.length} saved {favorites.length === 1 ? 'item' : 'items'}
         </p>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-6" style={{backgroundColor: 'rgba(255, 251, 247, 1)'}}>
         {platforms.map((platform) => (
-          <button
-            key={platform}
-            onClick={() => setSelectedPlatform(platform)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-              selectedPlatform === platform
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            {platform}
-          </button>
+        <button
+  key={platform}
+  onClick={() => setSelectedPlatform(platform)}
+  className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition"
+  style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)' }}
+>
+  {platform}
+</button>
         ))}
       </div>
 
@@ -86,34 +85,35 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
           <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
         </div>
       ) : filteredFavorites.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20" >
           <Heart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>
             {selectedPlatform === 'All' ? 'No favorites yet' : `No favorites from ${selectedPlatform}`}
           </h3>
-          <p className="text-slate-600 mb-6">
+          <p className="text-slate-600 mb-6" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', fontSize: '1.5rem' }}>
             Start saving items you love while browsing
           </p>
         </div>
       ) : (
         <>
-          <div className="mb-6 bg-gradient-to-r from-violet-50 to-fuchsia-50 border border-violet-200 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <Wand2 className="w-5 h-5 text-violet-600 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-slate-900 mb-1">AI Mix & Match</h3>
-                <p className="text-sm text-slate-700 mb-3">
-                  Create outfits with your favorites and see how they look on you
-                </p>
-                <button 
-                  onClick={() => onVirtualTryOnClick(favorites)}
-                  className="text-sm font-medium bg-white text-violet-700 px-4 py-2 rounded-lg hover:bg-violet-50 transition"
-                >
-                  Try Virtual Try-On
-                </button>
-              </div>
-            </div>
-          </div>
+          <div className="mb-6 border rounded-xl p-4" style={{ backgroundColor: 'rgb(248, 242, 237)', borderColor: 'rgb(45, 80, 22)' }}>
+  <div className="flex items-start gap-3">
+    <Wand2 className="w-5 h-5 mt-0.5" style={{ color: 'rgb(242, 109, 22)' }} />
+    <div>
+      <h3 className="font-semibold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)' }}>AI Mix & Match</h3>
+      <p className="text-sm text-slate-700 mb-3" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(45, 80, 22)', background: 'rgb(248, 242, 237)', borderColor: 'rgb(45, 80, 22)', fontSize: '1.40rem' }}>
+        Create outfits with your favorites and see how they look on you
+      </p>
+      <button 
+        onClick={() => onVirtualTryOnClick(favorites)}
+        className="text-sm font-medium px-4 py-2 rounded-lg transition"
+        style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)' }}
+      >
+        Try Virtual Try-On
+      </button>
+    </div>
+  </div>
+</div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {filteredFavorites.map((item) => (
@@ -146,26 +146,28 @@ export default function FavoritesView({ onProductClick, onVirtualTryOnClick }: F
                   </div>
                 </div>
                 <div className="p-3">
-                  <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2">
+                  <h3 className="font-medium text-slate-900 text-sm mb-1 line-clamp-2" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45 80 22)' }}>
                     {item.item_name}
                   </h3>
-                  <p className="text-lg font-bold text-slate-900">
+                  <p className="text-lg font-bold text-slate-900" style={{ fontFamily: 'var(--font-tangerine)', color: 'rgb(242, 109, 22)', fontSize: '1.75rem' }}>
                     ${item.price}
                   </p>
-                  <p className="text-xs text-slate-500 mt-1">{item.currency}</p>
+                  <p className="text-xs text-slate-500 mt-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', fontSize: '1rem' }}>{item.currency}</p>
                   {item.seller && (
-                    <p className="text-xs text-slate-400 mt-1">by {item.seller}</p>
+                    <p className="text-xs text-slate-400 mt-1" style={{ fontFamily: 'var(--font-warbler)', color: 'rgb(45, 80, 22)', fontSize: '1rem' }}>by {item.seller}</p>
                   )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(item.url, '_blank');
                     }}
-                    className="mt-3 flex items-center justify-center gap-2 w-full bg-slate-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition"
+                    className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-medium transition"
+                    style={{ backgroundColor: 'rgb(45, 80, 22)', color: 'rgb(248, 242, 237)' }}
                   >
-                    <ShoppingCart className="w-4 h-4" />
-                    View Listing
-                  </button>
+
+  <ShoppingCart className="w-4 h-4" style={{ color: 'rgb(248, 242, 237)' }} />
+  View Listing
+</button>
                 </div>
               </div>
             ))}

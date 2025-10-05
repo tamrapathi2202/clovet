@@ -1,38 +1,30 @@
-/* Custom Font Definitions */
-
-/* Goldman Font Family */
 @font-face {
-  font-family: "warbler-font-family-1759582272-0";
-  src: url("./warbler-font-family-1759582272-0/WarblerBanner-Regular-Testing-BF674fd38676e7d.otf") format("truetype");
+  font-family: "warbler-banner";
+  src: url("./warbler-banner/WARBLERBANNER-BOLD-TESTING-BF674FD3863B486.OTF") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face{
+    font-family: "tangerine";
+    src: url("./tangerine/Tangerine-Bold.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+  font-family:"warbler-font-family-1759582272-0";
+  src: url("./warbler-font-family-1759582272-0/WarblerBanner-Bold-Testing-BF674fd3863b486.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
-@font-face {
-  font-family: "warbler-font-family-1759582272-0";
-  src: url("./warbler-font-family-1759582272-0/WarblerBanner-Bold-Testing-BF674fd3863b486.otf") format("truetype");
-  font-weight: bold;
-  font-style: normal;
-  font-display: swap;
-}
-
-
-/* CSS Custom Properties for easy usage */
 :root {
-  --font-goldman: "warbler-font-family-1759582272-0", sans-serif;
+  --font-warbler: "warbler-font-family-1759582272-0", sans-serif;
+  --font-tangerine: "tangerine", cursive;
 }
-
-/* Utility Classes */
-.font-goldman {
-  font-family: var(--font-goldman);
-}
-
-.font-goldman-bold {
-  font-family: var(--font-goldman);
-  font-weight: bold;
-}
-
-.font-lobster {
-  font-family: var(--font-lobster);
-}
+.ffinput::placeholder {
+    color: rgb(108, 134, 110); 
+    opacity: 1; 
+  }
