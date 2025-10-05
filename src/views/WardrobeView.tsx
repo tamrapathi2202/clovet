@@ -525,15 +525,6 @@ export default function WardrobeView() {
                   </div>
                 )}
 
-                {aiDetectionError && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-amber-700">
-                      <AlertCircle className="w-4 h-4" />
-                      <span className="text-sm font-medium">AI Detection Notice</span>
-                    </div>
-                    <p className="text-sm text-amber-600 mt-1">{aiDetectionError}</p>
-                  </div>
-                )}
 
                 {/* Item Name */}
                 <div>

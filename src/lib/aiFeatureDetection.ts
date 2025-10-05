@@ -118,6 +118,7 @@ export function mapAITypeToCategory(aiType: string): string {
     'Tank Tops': 'Tops',
     'Sweaters': 'Tops',
     'Hoodies': 'Tops',
+    'Top': 'Tops',
     'Jeans': 'Bottoms',
     'Pants': 'Bottoms',
     'Trousers': 'Bottoms',
@@ -138,14 +139,6 @@ export function mapAITypeToCategory(aiType: string): string {
     'Flats': 'Shoes',
     'Sandals': 'Shoes',
     'Loafers': 'Shoes',
-    'Bags': 'Accessories',
-    'Handbags': 'Accessories',
-    'Backpacks': 'Accessories',
-    'Belts': 'Accessories',
-    'Hats': 'Accessories',
-    'Scarves': 'Accessories',
-    'Jewelry': 'Accessories',
-    'Watches': 'Accessories'
   };
 
   return typeMapping[aiType] || 'Accessories';
